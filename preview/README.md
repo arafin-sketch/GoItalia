@@ -10,5 +10,7 @@ A no-build web version of ItaliaNow that runs fully online in the browser:
 Run locally: `cd preview && python3 -m http.server 8080`, then open http://localhost:8080
 (location needs `localhost` or HTTPS).
 
+Published at https://arafin-sketch.github.io/GoItalia/ from the `gh-pages` branch.
+
 Configuration lives in `config.js` (`API_BASE` can point to your own MOTIS server).
 `data/network.json` is a copy of `assets/data/network.json`, built by `tools/dataset/build_offline_dataset.py`.
