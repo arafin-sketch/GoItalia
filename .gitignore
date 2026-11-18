@@ -1,0 +1,7 @@
+tools/dataset/.cache/
+tools/preview/out/
+.dart_tool/
+build/
+.idea/
+*.iml
+.DS_Store
