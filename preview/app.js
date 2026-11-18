@@ -13,7 +13,7 @@ const store = {
 /* ================= i18n ================= */
 const STR = {
  en: {
-  plan: "Plan", nearby: "Nearby", lines: "Lines", saved: "Saved", more: "More",
+  plan: "Directions", nearby: "Nearby", where_to: "Where to?", set_home: "Set home", set_work: "Set work", save_place: "Save this destination", saved_places: "Saved places", remove: "Remove", share: "Share", copied: "Copied", install: "Install app", install_s: "Add ItaliaNow to your home screen.", sort_by: "Sort", set_hint: "Search for a place, then save it as Home or Work from the results.", lines: "Lines", saved: "Saved", more: "More",
   from: "From", to: "To", choose_start: "Choose start", choose_dest: "Choose destination", swap: "Swap start and destination",
   now: "Now", depart_at: "Depart at", arrive_by: "Arrive by", search: "Search routes", fewest: "Fewest changes", fastest: "Fastest",
   my_location: "My location", pick_map: "Pick on map", pick_hint: "Tap the map to choose a place",
@@ -47,10 +47,10 @@ const STR = {
   err_title: "Couldn't load departures", err_body: "Check your connection and try again.", in_min: "in {m} min", due: "now",
   all: "All", bus: "Bus", train: "Train", ferry: "Ferry", other: "Other", trip: "Trip", live_vehicles: "Live vehicles", lines_hint: "Buses, trains and every other line: tap a departure in Nearby or a vehicle on the map to see all its stops live.",
   trip_err: "Couldn't load this trip.", then: "then", arrived: "Arrived", zoom_vehicles: "Zoom in to see live vehicles",
-  lines_title: "Lines", stop_dep: "Departures", geo_err: "Search is unavailable right now. Showing stations from the built-in network.",
+  about: "About", lines_title: "Lines", stop_dep: "Departures", geo_err: "Search is unavailable right now. Showing stations from the built-in network.",
  },
  it: {
-  plan: "Percorso", nearby: "Vicino", lines: "Linee", saved: "Salvati", more: "Altro",
+  plan: "Percorso", nearby: "Vicino", where_to: "Dove vuoi andare?", set_home: "Imposta casa", set_work: "Imposta lavoro", save_place: "Salva questa destinazione", saved_places: "Luoghi salvati", remove: "Rimuovi", share: "Condividi", copied: "Copiato", install: "Installa app", install_s: "Aggiungi ItaliaNow alla schermata Home.", sort_by: "Ordina", set_hint: "Cerca un luogo, poi salvalo come Casa o Lavoro dai risultati.", lines: "Linee", saved: "Salvati", more: "Altro",
   from: "Da", to: "A", choose_start: "Scegli partenza", choose_dest: "Scegli destinazione", swap: "Inverti partenza e destinazione",
   now: "Adesso", depart_at: "Parti alle", arrive_by: "Arriva entro", search: "Cerca percorsi", fewest: "Meno cambi", fastest: "Più veloce",
   my_location: "La mia posizione", pick_map: "Scegli sulla mappa", pick_hint: "Tocca la mappa per scegliere un luogo",
@@ -84,7 +84,7 @@ const STR = {
   err_title: "Impossibile caricare le partenze", err_body: "Controlla la connessione e riprova.", in_min: "tra {m} min", due: "ora",
   all: "Tutti", bus: "Bus", train: "Treno", ferry: "Traghetto", other: "Altro", trip: "Corsa", live_vehicles: "Mezzi in tempo reale", lines_hint: "Bus, treni e tutte le altre linee: tocca una partenza in Vicino o un mezzo sulla mappa per vedere tutte le fermate in tempo reale.",
   trip_err: "Impossibile caricare questa corsa.", then: "poi", arrived: "Arrivato", zoom_vehicles: "Ingrandisci per vedere i mezzi in tempo reale",
-  lines_title: "Linee", stop_dep: "Partenze", geo_err: "Ricerca non disponibile ora. Mostro le stazioni della rete integrata.",
+  about: "Informazioni", lines_title: "Linee", stop_dep: "Partenze", geo_err: "Ricerca non disponibile ora. Mostro le stazioni della rete integrata.",
  },
 };
 const sysLang = (navigator.language || "en").toLowerCase().startsWith("it") ? "it" : "en";
@@ -393,7 +393,7 @@ function addMarker(lat, lon, cls, html, onClick, label) {
 }
 function mapPadding() {
   if (innerWidth >= 900) return { top: 90, bottom: 40, left: 440, right: 40 };
-  return { top: 110, bottom: Math.round(app.clientHeight * SNAPS[snap]) + 20, left: 30, right: 30 };
+  return { top: 110, bottom: Math.min(Math.round(sheetH()) + 20, app.clientHeight - 200), left: 30, right: 30 };
 }
 function fit(points, maxZoom = 16) {
   if (!map || !points.length) return;
@@ -405,14 +405,20 @@ function flyTo(lat, lon, zoom = 15.5) { map?.easeTo({ center: [lon, lat], zoom, 
 
 /* ================= sheet ================= */
 const sheet = $("#sheet"), grab = $("#grab");
-const SNAPS = [0.30, 0.58, 0.84]; let snap = 1;
-function setSnap(i) { snap = Math.max(0, Math.min(2, i)); if (innerWidth >= 900) return; const H = app.clientHeight; sheet.style.transform = `translateY(${sheet.clientHeight - H * SNAPS[snap]}px)`; }
-(() => { let y0 = null, base = 0;
-  grab.addEventListener("pointerdown", e => { grab.setPointerCapture(e.pointerId); y0 = e.clientY; base = new DOMMatrix(getComputedStyle(sheet).transform).m42; sheet.classList.add("dragging"); });
-  grab.addEventListener("pointermove", e => { if (y0 == null) return; sheet.style.transform = `translateY(${Math.max(0, base + e.clientY - y0)}px)`; });
-  const end = e => { if (y0 == null) return; sheet.classList.remove("dragging"); const ty = new DOMMatrix(getComputedStyle(sheet).transform).m42; const vis = (sheet.clientHeight - ty) / app.clientHeight; let bi = 0, bd = 9; SNAPS.forEach((s, i) => { if (Math.abs(s - vis) < bd) { bd = Math.abs(s - vis); bi = i; } }); if (Math.abs(e.clientY - y0) < 4) bi = (snap + 1) % 3; y0 = null; setSnap(bi); };
+// The panel's height is the visible height, so its list can always scroll to the very end.
+let snap = 1;
+const NAV_H = () => $("#nav").offsetHeight || 64;
+function snapHeights() { const H = app.clientHeight; return [Math.round(H * 0.34), Math.round(H * 0.6), H - 72]; }
+const sheetH = () => sheet.getBoundingClientRect().height;
+function setSnap(i) { snap = Math.max(0, Math.min(2, i)); if (innerWidth >= 900) { sheet.style.height = ""; return; } sheet.style.height = snapHeights()[snap] + "px"; }
+(() => { let y0 = null, h0 = 0, moved = false;
+  grab.addEventListener("pointerdown", e => { grab.setPointerCapture(e.pointerId); y0 = e.clientY; h0 = sheetH(); moved = false; sheet.classList.add("dragging"); });
+  grab.addEventListener("pointermove", e => { if (y0 == null) return; if (Math.abs(e.clientY - y0) > 4) moved = true; const hs = snapHeights(); sheet.style.height = Math.max(hs[0] - 40, Math.min(hs[2], h0 - (e.clientY - y0))) + "px"; });
+  const end = () => { if (y0 == null) return; sheet.classList.remove("dragging"); y0 = null;
+    if (!moved) return setSnap(snap === 2 ? 1 : snap + 1);
+    const h = sheetH(); const hs = snapHeights(); let bi = 0; hs.forEach((v, i) => { if (Math.abs(v - h) < Math.abs(hs[bi] - h)) bi = i; }); setSnap(bi); };
   grab.addEventListener("pointerup", end); grab.addEventListener("pointercancel", end);
-  grab.addEventListener("keydown", e => { if (e.key === "ArrowUp") setSnap(snap + 1); if (e.key === "ArrowDown") setSnap(snap - 1); if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSnap((snap + 1) % 3); } });
+  grab.addEventListener("keydown", e => { if (e.key === "ArrowUp") setSnap(snap + 1); if (e.key === "ArrowDown") setSnap(snap - 1); if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSnap(snap === 2 ? 1 : snap + 1); } });
   new ResizeObserver(() => setSnap(snap)).observe(app);
 })();
 
@@ -431,12 +437,12 @@ function renderStrike() {
   if (st && !S.strikeDismissed) {
     const day = new Date(st.start), now = new Date(); const pd = romeParts(day), pn = romeParts(now);
     const diff = (Date.UTC(pd.y, pd.mo - 1, pd.d) - Date.UTC(pn.y, pn.mo - 1, pn.d)) / 864e5;
-    if (diff >= 0 && diff <= 7) html = `<div class="strike" role="alert">${I.warn}<div><b>${esc(diff === 0 ? t("strike_today") : t("strike_soon", { d: fmtDay(day) }))}</b><br>${esc(st.h || "")} · <a href="https://scioperi.mit.gov.it/mit2/public/scioperi" target="_blank" rel="noopener">${t("strike_cal")}</a></div><button aria-label="Close" data-act="dismiss-strike">×</button></div>`;
+    if (diff >= 0 && diff <= 7) html = `<div class="strike compact" role="alert">${I.warn}<a href="https://scioperi.mit.gov.it/mit2/public/scioperi" target="_blank" rel="noopener" title="${esc(st.h || "")}"><b>${esc(diff === 0 ? t("strike_today") : t("strike_soon", { d: fmtDay(day) }))}</b></a><button aria-label="Close" data-act="dismiss-strike">×</button></div>`;
   }
   $("#strikeSlot").innerHTML = html;
 }
 function renderNav() {
-  const tabs = [["nearby", I.near], ["plan", I.route], ["lines", I.lines], ["saved", I.star], ["more", I.more]];
+  const tabs = [["nearby", I.near], ["plan", I.route], ["lines", I.lines], ["more", I.more]];
   $("#nav").innerHTML = tabs.map(([k, ic]) => `<button data-tab="${k}" ${S.tab === k ? 'aria-current="page"' : ""}><i>${ic}</i>${t(k)}</button>`).join("");
 }
 addEventListener("online", () => { S.apiDown = false; renderBadge(); if (S.tab === "nearby") loadNearby(); });
@@ -444,12 +450,15 @@ addEventListener("offline", renderBadge);
 
 /* ================= location ================= */
 function getLocation() {
-  return new Promise(res => {
-    if (!navigator.geolocation) { S.locState = "error"; return res(null); }
-    S.locState = "asking";
+  return new Promise(resolve => {
+    if (!navigator.geolocation) { S.locState = "error"; return resolve(null); }
+    S.locState = "asking"; let done = false;
+    const finish = v => { if (!done) { done = true; clearTimeout(timer); resolve(v); } };
+    // if the prompt is ignored or no fix arrives, carry on instead of waiting forever
+    const timer = setTimeout(() => { if (!done) { S.locState = "error"; finish(null); } }, 15000);
     navigator.geolocation.getCurrentPosition(
-      p => { S.locState = "granted"; S.me = [p.coords.latitude, p.coords.longitude]; store.set("locAsked", true); res(S.me); },
-      e => { S.locState = e.code === 1 ? "denied" : "error"; store.set("locAsked", true); res(null); },
+      p => { S.locState = "granted"; S.me = [p.coords.latitude, p.coords.longitude]; finish(S.me); },
+      e => { S.locState = e.code === 1 ? "denied" : "error"; finish(null); },
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 });
   });
 }
@@ -559,7 +568,9 @@ function renderNearby(el) {
   if (S.view === "stop") return renderStop(el);
   if (S.view === "trip") return renderTrip(el);
   const n = S.nearby, R = CFG.NEARBY_RADIUS_M;
-  let html = `<h2 class="title">${t("nearby_title")}</h2>`;
+  let html = `<button class="whereto" data-act="where-to">${I.search}<span>${t("where_to")}</span></button>
+    ${S.home || S.work ? `<div class="chips" style="padding-top:8px">${S.home ? `<button class="chip" data-act="go-home">${I.home}${t("home")}</button>` : ""}${S.work ? `<button class="chip" data-act="go-work">${I.work}${t("work")}</button>` : ""}</div>` : ""}
+    <h2 class="title" style="margin-top:14px">${t("nearby_title")}</h2>`;
   if (S.locState === "denied") html += `<div class="alert" role="status">${I.near}<span>${t("loc_denied")}</span></div>`;
   else if (S.locState === "error") html += `<div class="alert" role="status">${I.near}<span>${t("loc_err")}</span></div>`;
   else if (S.locState === "asking") html += `<div class="snap">${I.near}${t("locating")}</div>`;
@@ -675,11 +686,10 @@ function renderPlan(el) {
       <div class="chips" role="group">
         <button class="chip" data-act="myloc">${I.near}${t("my_location")}</button>
         <button class="chip" data-act="pickmap">${I.map}${t("pick_map")}</button>
-        ${S.home ? `<button class="chip" data-act="use-home">${I.home}${t("home")}</button>` : ""}${S.work ? `<button class="chip" data-act="use-work">${I.work}${t("work")}</button>` : ""}
+<button class="chip" data-act="${S.home ? "use-home" : "hint-home"}">${I.home}${S.home ? t("home") : t("set_home")}</button><button class="chip" data-act="${S.work ? "use-work" : "hint-home"}">${I.work}${S.work ? t("work") : t("set_work")}</button>
       </div>
       <div class="seg" role="group" style="margin-top:12px">${["now", "depart", "arrive"].map(m => `<button data-time="${m}" aria-pressed="${S.timeMode === m}">${t(m === "now" ? "now" : m === "depart" ? "depart_at" : "arrive_by")}</button>`).join("")}</div>
       ${S.timeMode !== "now" ? `<div style="margin-top:8px"><input class="timein tnum" id="timeIn" type="datetime-local" value="${S.timeVal || defaultTimeVal()}" aria-label="${t("depart_at")}"></div>` : ""}
-      <div class="seg" role="group" style="margin-top:8px"><button data-pref="fastest" aria-pressed="${S.pref === "fastest"}">${t("fastest")}</button><button data-pref="fewest" aria-pressed="${S.pref === "fewest"}">${t("fewest")}</button></div>
       <button class="btn" data-act="search" style="width:100%;margin-top:14px">${t("search")}</button>
       ${S.recents.length ? `<h3 class="sub">${t("recent")}</h3><div class="list">${S.recents.slice(0, 5).map((r, i) => `<button class="line-row" data-act="recent" data-i="${i}">${I.clock.replace("<svg", '<svg width="20" height="20"')}<span class="t">${esc(r.from.name)} → ${esc(r.to.name)}</span></button>`).join("")}</div>` : ""}
     </div>`;
@@ -717,13 +727,13 @@ function legChips(legs) {
     const sep = i ? `<svg class="sep" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>` : "";
     if (l.mode === "WALK" || l.kind === "walk") { const s = l.duration ?? l.s; return s >= 120 ? sep + `<span class="walk" aria-label="${t("walk")}">${I.walk}${Math.round(s / 60)}</span>` : ""; }
     if (l.kind === "ride") { const L = lineById[l.line]; return sep + chip(lineName(L), L.color, L.mode); }
-    return sep + chip(liveName(l.displayName || l.routeShortName || l.tripShortName), l.routeColor, liveMode(l.mode));
+    return sep + chip(liveName(l.displayName || l.routeShortName || l.tripShortName), liveColor(l.routeColor, l.mode), liveMode(l.mode));
   }).join("").replace(/^<svg class="sep"[^]*?<\/svg>/, "");
 }
 function decode(str, prec = 6) { const f = 10 ** prec; let i = 0, lat = 0, lon = 0; const out = []; while (i < str.length) { for (const w of [0, 1]) { let r = 0, s = 0, b; do { b = str.charCodeAt(i++) - 63; r |= (b & 31) << s; s += 5; } while (b >= 32); const d = r & 1 ? ~(r >> 1) : r >> 1; if (w) lon += d; else lat += d; } out.push([lat / f, lon / f]); } return out; }
 function liveJourneyFC(it) {
   const feats = [], pts = [];
-  for (const l of it.legs) { const g = l.legGeometry; const p = g?.points ? decode(g.points, g.precision || 6) : [[l.from.lat, l.from.lon], [l.to.lat, l.to.lon]]; pts.push(...p); feats.push({ type: "Feature", properties: { walk: l.mode === "WALK", color: "#" + normColor(l.routeColor) }, geometry: { type: "LineString", coordinates: p.map(([a, b]) => [b, a]) } }); }
+  for (const l of it.legs) { const g = l.legGeometry; const p = g?.points ? decode(g.points, g.precision || 6) : [[l.from.lat, l.from.lon], [l.to.lat, l.to.lon]]; pts.push(...p); feats.push({ type: "Feature", properties: { walk: l.mode === "WALK", color: "#" + liveColor(l.routeColor, l.mode) }, geometry: { type: "LineString", coordinates: p.map(([a, b]) => [b, a]) } }); }
   return { fc: { type: "FeatureCollection", features: feats }, pts };
 }
 function offLegPts(l) { if (l.kind === "walk") { const a = l.from ? stations[l.from] : S.from, b = l.to ? stations[l.to] : S.to; return [[a.lat, a.lon], [b.lat, b.lon]]; } return [l.from, ...l.stops].map(s => [stations[s].lat, stations[s].lon]); }
@@ -731,7 +741,10 @@ function offJourneyFC(o) { const pts = []; const feats = o.legs.map(l => { const
 function endMarkers() { clearMarkers(); showMe(); addMarker(S.from.lat, S.from.lon, "mk-end"); addMarker(S.to.lat, S.to.lon, "mk-end to"); }
 const backBtn = act => `<button class="back" data-act="${act}">${I.back}${t("back")}</button>`;
 function renderResults(el) {
-  const R = S.planResult; let html = `${backBtn("to-plan")}<h2 class="title">${esc(S.from.name)} → ${esc(S.to.name)}</h2>`;
+  const R = S.planResult; let html = `${backBtn("to-plan")}<h2 class="title">${esc(S.from.name)} → ${esc(S.to.name)}</h2>
+    <div class="seg" role="group" aria-label="${t("sort_by")}" style="margin-bottom:12px"><button data-pref="fastest" aria-pressed="${S.pref === "fastest"}">${t("fastest")}</button><button data-pref="fewest" aria-pressed="${S.pref === "fewest"}">${t("fewest")}</button></div>`;
+  const saveRow = S.to && S.to.kind !== "me" && S.home?.name !== S.to.name && S.work?.name !== S.to.name
+    ? `<div class="row" style="margin-top:14px"><span class="muted small">${t("save_place")}:</span><button class="chip" data-act="save-home">${I.home}${t("home")}</button><button class="chip" data-act="save-work">${I.work}${t("work")}</button></div>` : "";
   endMarkers();
   if (!R) { el.innerHTML = html + `<div class="list" aria-busy="true" aria-label="${t("loading")}"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>`; fit([[S.from.lat, S.from.lon], [S.to.lat, S.to.lon]], 15); return; }
   if (R.live) {
@@ -749,12 +762,12 @@ function renderResults(el) {
     else { html += `<div class="list" style="margin-top:8px">${R.off.map((o, i) => `<button class="card" data-act="detail" data-i="${i}"><div class="tag">${t(o.pref)}</div><div class="res-top"><span class="res-time tnum">≈ ${secOfDay(o.dep)} – ${secOfDay(o.arr)}</span><span class="res-dur tnum">${fmtDur(o.dur)}</span></div><div class="res-legs">${legChips(o.legs)}</div><div class="res-meta"><span>${t("changes", o.transfers)}</span>${o.walk ? `<span>· ${t("total_walk", { d: fmtDist(o.walk) })}</span>` : ""}<span class="delay" style="background:var(--surface-3);color:var(--fg-2)">${t("estimated")}</span></div></button>`).join("")}</div>`;
       const { fc, pts } = offJourneyFC(R.off[0]); setJourney(fc); fit(pts); }
   }
-  el.innerHTML = html;
+  el.innerHTML = html + (R ? saveRow : "");
 }
 function renderDetail(el) {
   const R = S.planResult, i = S.params.i; const rows = [];
   const row = (time, sched, cls, color, node, body) => rows.push(`<div class="tl-row"><div class="tl-time tnum">${time}${sched ? `<s>${sched}</s>` : ""}</div><div class="tl-rail ${cls}" style="--c:${color}">${node}</div><div class="tl-body">${body}</div></div>`);
-  let html = `${backBtn("to-results")}<h2 class="title">${t("details")}</h2>`;
+  let html = `<div class="row" style="justify-content:space-between">${backBtn("to-results")}<button class="btn text" data-act="share">${t("share")}</button></div><h2 class="title">${t("details")}</h2>`;
   endMarkers();
   if (R.live) {
     const it = R.its[i];
@@ -766,8 +779,8 @@ function renderDetail(el) {
       else {
         const alerts = (l.alerts || []).slice(0, 2).map(a => `<div class="alert ${a.cause === "STRIKE" ? "strk" : ""}">${I.warn}<span><b>${esc(a.headerText || "")}</b></span></div>`).join("");
         const stops = l.intermediateStops || [];
-        row(fmtTime(st), shifted ? fmtTime(sst) : "", k === 0 ? "first" : "", "#" + normColor(l.routeColor), `<span class="node"></span>`,
-          `<div class="stn">${esc(fromName)}</div><div class="info">${chip(liveName(l.displayName || l.routeShortName), l.routeColor, liveMode(l.mode))}<span>${t("towards")} ${esc(titleish(l.headsign || ""))}</span>${l.from.track ? `<span class="plat">${t("platform")} ${esc(l.from.track)}</span>` : ""}${delayBadge(l.scheduledStartTime, l.startTime, l.realTime, l.cancelled)}</div>
+        row(fmtTime(st), shifted ? fmtTime(sst) : "", k === 0 ? "first" : "", "#" + liveColor(l.routeColor, l.mode), `<span class="node"></span>`,
+          `<div class="stn">${esc(fromName)}</div><div class="info">${chip(liveName(l.displayName || l.routeShortName), liveColor(l.routeColor, l.mode), liveMode(l.mode))}<span>${t("towards")} ${esc(titleish(l.headsign || ""))}</span>${l.from.track ? `<span class="plat">${t("platform")} ${esc(l.from.track)}</span>` : ""}${delayBadge(l.scheduledStartTime, l.startTime, l.realTime, l.cancelled)}</div>
            <div class="info">${esc(l.agencyName || "")} · ${fmtDur(l.duration)}</div>
            <details class="stops"><summary>${t("stops", stops.length + 1)} ▾</summary><ol>${stops.map(s => `<li>${esc(titleish(s.name))}</li>`).join("")}<li>${esc(titleish(l.to.name))}</li></ol></details>${alerts}`);
       }
@@ -863,6 +876,10 @@ function renderMore(el) {
     <label class="set"><span class="t"><b>${t("crash")}</b><small>${t("crash_s")}</small></span><span class="switch"><input type="checkbox" id="crashSw" ${S.crash ? "checked" : ""}><span></span></span></label>
     <label class="set"><span class="t"><b>${t("sim_off")}</b><small>${t("sim_off_s")}</small></span><span class="switch"><input type="checkbox" id="offSw" ${S.simOffline ? "checked" : ""}><span></span></span></label>
     <a class="linkrow" href="https://scioperi.mit.gov.it/mit2/public/scioperi" target="_blank" rel="noopener">${I.warn}<span style="flex:1"><b>${t("strikes")}</b><br><span class="muted small">scioperi.mit.gov.it</span></span>${I.ext}</a>
+    <h3 class="sub">${t("saved_places")}</h3>
+    ${[["home", I.home], ["work", I.work]].map(([k, ic]) => `<div class="set"><span style="width:40px;height:40px;border-radius:50%;background:var(--brand-soft);color:var(--on-brand-soft);display:grid;place-items:center;flex:none">${ic.replace("<svg", '<svg width="20" height="20"')}</span><span class="t"><b>${t(k)}</b><small>${S[k] ? esc(S[k].name) : t("set_hint")}</small></span>${S[k] ? `<button class="btn text" data-act="rm-${k}">${t("remove")}</button>` : ""}</div>`).join("")}
+    ${installEvt ? `<button class="linkrow" data-act="install"><span style="flex:1"><b>${t("install")}</b><br><span class="muted small">${t("install_s")}</span></span>${I.chev}</button>` : ""}
+    <h3 class="sub">${t("about")}</h3>
     <button class="linkrow" data-act="privacy"><span style="flex:1"><b>${t("privacy")}</b></span>${I.chev}</button>
     <button class="linkrow" data-act="attr"><span style="flex:1"><b>${t("attributions")}</b></span>${I.chev}</button>
     <p class="muted small" style="margin-top:16px">ItaliaNow 0.1.0 · MIT License · API: ${esc(CFG.API_BASE.replace(/^https?:\/\//, ""))}</p>`;
@@ -915,7 +932,7 @@ app.addEventListener("click", async e => {
   if (d.branch) { S.params.branch = +d.branch; return render(); }
   if (d.station) return go("lines", "station", { sid: d.station, fromLine: S.params.id || S.params.fromLine });
   if (d.time) { S.timeMode = d.time; if (!S.timeVal) S.timeVal = defaultTimeVal(); return render(); }
-  if (d.pref) { S.pref = d.pref; return render(); }
+  if (d.pref) { S.pref = d.pref; if (S.view === "results") { S.planResult = null; render(); runPlan(); return; } return render(); }
   if (d.set === "language") { S.langPref = d.v; store.set("lang", d.v); document.documentElement.lang = lang(); return render(); }
   if (d.set === "theme") { S.themePref = d.v; store.set("theme", d.v); applyTheme(); return render(); }
   switch (d.act) {
@@ -948,8 +965,16 @@ app.addEventListener("click", async e => {
     case "use-work": S[S.from ? "to" : "from"] = S.work; return render();
     case "save-home": S.home = S.to; store.set("home", S.home); return render();
     case "save-work": S.work = S.to; store.set("work", S.work); return render();
-    case "go-home": S.to = S.home; return go("plan");
-    case "go-work": S.to = S.work; return go("plan");
+    case "go-home": case "go-work": { S.to = d.act === "go-home" ? S.home : S.work; if (S.me) S.from = { kind: "me", name: t("my_location"), lat: S.me[0], lon: S.me[1] }; S.tab = "plan"; if (S.from && S.to) return doSearch(); return go("plan"); }
+    case "where-to": { S.tab = "plan"; S.view = null; if (S.me && !S.from) S.from = { kind: "me", name: t("my_location"), lat: S.me[0], lon: S.me[1] }; S.to = null; render(); setSnap(2); setTimeout(() => $("#toIn")?.focus(), 50); return; }
+    case "hint-home": toast(t("set_hint")); return;
+    case "rm-home": S.home = null; store.set("home", null); return render();
+    case "rm-work": S.work = null; store.set("work", null); return render();
+    case "install": if (installEvt) { installEvt.prompt(); installEvt = null; render(); } return;
+    case "share": { const R = S.planResult; const it = R?.live ? R.its[S.params.i] : null;
+      const text = `${S.from.name} → ${S.to.name}` + (it ? `\n${fmtTime(new Date(it.startTime))}–${fmtTime(new Date(it.endTime))} · ${fmtDur(it.duration)} · ` + it.legs.filter(l => l.mode !== "WALK").map(l => liveName(l.displayName || l.routeShortName)).join(" → ") : "");
+      try { if (navigator.share) await navigator.share({ title: "ItaliaNow", text, url: location.href }); else { await navigator.clipboard.writeText(text + "\n" + location.href); toast(t("copied")); } } catch {}
+      return; }
     case "dismiss-strike": S.strikeDismissed = true; return renderStrike();
   }
 });
@@ -961,6 +986,11 @@ function applyTheme() {
   document.querySelector('meta[name="theme-color"]').content = isDark() ? "#151B18" : "#0B6B4F"; refreshMapStyle();
 }
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", applyTheme);
+
+/* ================= installable app ================= */
+let installEvt = null;
+addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; if (S.tab === "more") render(); });
+if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
 
 /* ================= boot ================= */
 (async () => {

@@ -87,7 +87,7 @@ button{cursor:pointer}
 .grab{flex:none;height:28px;display:grid;place-items:center;cursor:grab;touch-action:none}
 .grab span{width:40px;height:5px;border-radius:3px;background:var(--line)}
 .sheet-body{flex:1;overflow:auto;padding:0 16px 96px;overscroll-behavior:contain}
-.nav{position:absolute;left:0;right:0;bottom:0;z-index:6;display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface-2);border-top:1px solid var(--line);
+.nav{position:absolute;left:0;right:0;bottom:0;z-index:6;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface-2);border-top:1px solid var(--line);
   padding-bottom:env(safe-area-inset-bottom,0px)}
 .nav button{border:0;background:none;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12px;font-weight:600;color:var(--fg-2)}
 .nav button i{width:56px;height:30px;border-radius:15px;display:grid;place-items:center;transition:background .2s}

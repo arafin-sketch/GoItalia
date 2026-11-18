@@ -47,3 +47,18 @@ body{padding:0!important;overflow:hidden}
 .deprow:hover{background:var(--surface-2)}
 .stop-head .lc.sm svg{width:12px;height:12px}
 .stop-head{gap:6px}
+/* panel sized by height (not shifted off-screen) so lists scroll to the end */
+.sheet{transform:none!important;top:auto;height:60%;transition:height .3s cubic-bezier(.2,.8,.2,1);will-change:height}
+.sheet.dragging{transition:none}
+.sheet-body{padding-bottom:calc(88px + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch;min-height:0}
+.grab{height:32px}
+@media (min-width:900px){.sheet{height:100%!important}}
+/* simpler UI */
+.whereto{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:0 16px;border:0;border-radius:var(--r-md);background:var(--surface-2);color:var(--fg-2);font-size:16px;font-weight:600;text-align:left;margin-top:4px}
+.whereto svg{width:20px;height:20px;color:var(--brand)}
+.whereto:hover{background:var(--surface-3)}
+.strike.compact{align-items:center;padding:6px 6px 6px 12px;font-size:13px}
+.strike.compact a{text-decoration:none;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.strike.compact a b{text-decoration:underline}
+.strike.compact svg{margin:0}
+.strike.compact button{margin:0;min-width:40px;min-height:40px}
