@@ -1,0 +1,42 @@
+name: Refresh ticket prices
+# Every morning: read ticket prices from the operators' official websites and publish them.
+on:
+  schedule:
+    - cron: "17 4 * * *"   # 05:17 / 06:17 Rome time
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: { group: fares, cancel-in-progress: false }
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get install -y poppler-utils
+      - name: Read prices from official websites
+        id: fares
+        run: |
+          python3 tools/fares/update_fares.py | tee report.txt
+          if grep -q "PRICES CHANGED" report.txt; then echo "changed=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Save changed prices on main
+        if: steps.fares.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add preview/data/fares.json
+          git commit -m "Update ticket prices from official websites" -m "$(cat report.txt)"
+          git push
+      - name: Publish to the website (gh-pages)
+        run: |
+          git fetch origin gh-pages
+          git worktree add site origin/gh-pages
+          rsync -a --delete --exclude .git --exclude README.md preview/ site/
+          cp assets/data/network.json site/data/network.json
+          touch site/.nojekyll
+          cd site
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "nothing to publish"; exit 0; fi
+          git commit -m "Daily ticket price check"
+          git push origin HEAD:gh-pages

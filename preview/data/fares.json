@@ -8,14 +8,53 @@
       "agencies": "atac|roma tpl",
       "single": "bit",
       "tickets": [
-        { "id": "bit", "en": "BIT single ticket", "it": "BIT biglietto integrato a tempo", "price": 1.50, "minutes": 100, "en_note": "Buses, trams and one metro ride within 100 minutes", "it_note": "Bus, tram e una corsa in metro entro 100 minuti" },
-        { "id": "24h", "en": "Roma 24 hours", "it": "Roma 24 ore", "price": 8.50 },
-        { "id": "48h", "en": "Roma 48 hours", "it": "Roma 48 ore", "price": 15.00 },
-        { "id": "72h", "en": "Roma 72 hours", "it": "Roma 72 ore", "price": 22.00 },
-        { "id": "cis", "en": "Weekly pass (CIS)", "it": "Integrata settimanale (CIS)", "price": 29.00 },
-        { "id": "month", "en": "Monthly pass, personal", "it": "Abbonamento mensile personale", "price": 35.00 },
-        { "id": "year", "en": "Annual pass", "it": "Abbonamento annuale", "price": 250.00 }
-      ]
+        {
+          "id": "bit",
+          "en": "BIT single ticket",
+          "it": "BIT biglietto integrato a tempo",
+          "price": 1.5,
+          "minutes": 100,
+          "en_note": "Buses, trams and one metro ride within 100 minutes",
+          "it_note": "Bus, tram e una corsa in metro entro 100 minuti"
+        },
+        {
+          "id": "24h",
+          "en": "Roma 24 hours",
+          "it": "Roma 24 ore",
+          "price": 8.5
+        },
+        {
+          "id": "48h",
+          "en": "Roma 48 hours",
+          "it": "Roma 48 ore",
+          "price": 15.0
+        },
+        {
+          "id": "72h",
+          "en": "Roma 72 hours",
+          "it": "Roma 72 ore",
+          "price": 22.0
+        },
+        {
+          "id": "cis",
+          "en": "Weekly pass (CIS)",
+          "it": "Integrata settimanale (CIS)",
+          "price": 29.0
+        },
+        {
+          "id": "month",
+          "en": "Monthly pass, personal",
+          "it": "Abbonamento mensile personale",
+          "price": 35.0
+        },
+        {
+          "id": "year",
+          "en": "Annual pass",
+          "it": "Abbonamento annuale",
+          "price": 250.0
+        }
+      ],
+      "checked": "2026-11-18"
     },
     "milan": {
       "operator": "ATM Milano",
@@ -23,9 +62,25 @@
       "agencies": "atm|amat",
       "single": "ord",
       "tickets": [
-        { "id": "ord", "en": "Single ticket, zones Mi1–Mi3", "it": "Biglietto ordinario, zone Mi1–Mi3", "price": 2.20, "minutes": 90, "en_note": "Metro, bus and tram within 90 minutes", "it_note": "Metro, bus e tram entro 90 minuti" },
-        { "id": "day", "en": "Daily cap with contactless card, Mi1–Mi3", "it": "Tetto giornaliero contactless, Mi1–Mi3", "price": 7.60, "en_note": "Tap the same bank card; you never pay more than this in a day", "it_note": "Con la stessa carta contactless non paghi mai più di così in un giorno" }
-      ]
+        {
+          "id": "ord",
+          "en": "Single ticket, zones Mi1–Mi3",
+          "it": "Biglietto ordinario, zone Mi1–Mi3",
+          "price": 2.2,
+          "minutes": 90,
+          "en_note": "Metro, bus and tram within 90 minutes",
+          "it_note": "Metro, bus e tram entro 90 minuti"
+        },
+        {
+          "id": "day",
+          "en": "Daily cap with contactless card, Mi1–Mi3",
+          "it": "Tetto giornaliero contactless, Mi1–Mi3",
+          "price": 7.6,
+          "en_note": "Tap the same bank card; you never pay more than this in a day",
+          "it_note": "Con la stessa carta contactless non paghi mai più di così in un giorno"
+        }
+      ],
+      "checked": "2026-11-18"
     },
     "naples": {
       "operator": "UnicoCampania (ANM, EAV)",
@@ -33,11 +88,32 @@
       "agencies": "anm|eav|unico|ctp|busitalia campania",
       "single": "orario",
       "tickets": [
-        { "id": "orario", "en": "Hourly ticket, Naples urban (U NA)", "it": "Biglietto orario, urbano Napoli (U NA)", "price": 1.90 },
-        { "id": "day", "en": "Daily ticket, Naples urban", "it": "Giornaliero, urbano Napoli", "price": 5.70 },
-        { "id": "3d", "en": "3-day ticket, Naples urban", "it": "3 giorni, urbano Napoli", "price": 10.80 },
-        { "id": "7d", "en": "7-day ticket, Naples urban", "it": "7 giorni, urbano Napoli", "price": 16.20 }
-      ]
+        {
+          "id": "orario",
+          "en": "Hourly ticket, Naples urban (U NA)",
+          "it": "Biglietto orario, urbano Napoli (U NA)",
+          "price": 1.9
+        },
+        {
+          "id": "day",
+          "en": "Daily ticket, Naples urban",
+          "it": "Giornaliero, urbano Napoli",
+          "price": 5.7
+        },
+        {
+          "id": "3d",
+          "en": "3-day ticket, Naples urban",
+          "it": "3 giorni, urbano Napoli",
+          "price": 10.8
+        },
+        {
+          "id": "7d",
+          "en": "7-day ticket, Naples urban",
+          "it": "7 giorni, urbano Napoli",
+          "price": 16.2
+        }
+      ],
+      "checked": "2026-11-18"
     },
     "turin": {
       "operator": "GTT",
@@ -45,13 +121,53 @@
       "agencies": "gtt",
       "single": "city",
       "tickets": [
-        { "id": "city", "en": "City ticket", "it": "Biglietto City", "price": 1.90, "paper": 2.00, "minutes": 100, "en_note": "€1.90 digital, €2.00 on paper. Includes one metro ride.", "it_note": "€1,90 digitale, €2,00 su carta. Include una corsa in metro." },
-        { "id": "multi", "en": "MultiCity (6 City tickets)", "it": "MultiCity (6 biglietti City)", "price": 11.80 },
-        { "id": "daily", "en": "Daily", "it": "Daily", "price": 3.70, "paper": 4.50, "en_note": "€3.70 digital, €4.50 on paper", "it_note": "€3,70 digitale, €4,50 su carta" },
-        { "id": "md7", "en": "MultiDaily 7 (7 days, any)", "it": "MultiDaily 7 (7 giornate)", "price": 21.00 },
-        { "id": "tour48", "en": "Tour 48 hours", "it": "Tour 48 ore", "price": 7.80, "paper": 9.50 },
-        { "id": "tour72", "en": "Tour 72 hours", "it": "Tour 72 ore", "price": 10.30, "paper": 12.50 }
-      ]
+        {
+          "id": "city",
+          "en": "City ticket",
+          "it": "Biglietto City",
+          "price": 1.9,
+          "paper": 2.0,
+          "minutes": 100,
+          "en_note": "€1.90 digital, €2.00 on paper. Includes one metro ride.",
+          "it_note": "€1,90 digitale, €2,00 su carta. Include una corsa in metro."
+        },
+        {
+          "id": "multi",
+          "en": "MultiCity (6 City tickets)",
+          "it": "MultiCity (6 biglietti City)",
+          "price": 11.8
+        },
+        {
+          "id": "daily",
+          "en": "Daily",
+          "it": "Daily",
+          "price": 3.7,
+          "paper": 4.5,
+          "en_note": "€3.70 digital, €4.50 on paper",
+          "it_note": "€3,70 digitale, €4,50 su carta"
+        },
+        {
+          "id": "md7",
+          "en": "MultiDaily 7 (7 days, any)",
+          "it": "MultiDaily 7 (7 giornate)",
+          "price": 21.0
+        },
+        {
+          "id": "tour48",
+          "en": "Tour 48 hours",
+          "it": "Tour 48 ore",
+          "price": 7.8,
+          "paper": 9.5
+        },
+        {
+          "id": "tour72",
+          "en": "Tour 72 hours",
+          "it": "Tour 72 ore",
+          "price": 10.3,
+          "paper": 12.5
+        }
+      ],
+      "checked": "2026-11-18"
     },
     "catania": {
       "operator": "FCE (metro) · AMTS",
@@ -59,13 +175,46 @@
       "agencies": "fce|circumetnea|amts",
       "single": "120",
       "tickets": [
-        { "id": "single", "en": "Metro single ride", "it": "Metro corsa semplice", "price": 1.00 },
-        { "id": "120", "en": "Metro 120 minutes (2 rides)", "it": "Metro 120 minuti (2 corse)", "price": 1.40, "minutes": 120 },
-        { "id": "24", "en": "Metro 24 hours (4 rides)", "it": "Metro 24 ore (4 corse)", "price": 3.00 },
-        { "id": "carnet", "en": "Metro carnet, 10 rides (app only)", "it": "Carnet metro 10 corse (solo app)", "price": 8.00 },
-        { "id": "mb120", "en": "MetroBus AMTS + FCE, 120 minutes", "it": "MetroBus AMTS + FCE, 120 minuti", "price": 2.00, "minutes": 120 },
-        { "id": "mb24", "en": "MetroBus AMTS + FCE, 24 hours", "it": "MetroBus AMTS + FCE, 24 ore", "price": 4.50 }
-      ]
+        {
+          "id": "single",
+          "en": "Metro single ride",
+          "it": "Metro corsa semplice",
+          "price": 1.0
+        },
+        {
+          "id": "120",
+          "en": "Metro 120 minutes (2 rides)",
+          "it": "Metro 120 minuti (2 corse)",
+          "price": 1.4,
+          "minutes": 120
+        },
+        {
+          "id": "24",
+          "en": "Metro 24 hours (4 rides)",
+          "it": "Metro 24 ore (4 corse)",
+          "price": 3.0
+        },
+        {
+          "id": "carnet",
+          "en": "Metro carnet, 10 rides (app only)",
+          "it": "Carnet metro 10 corse (solo app)",
+          "price": 8.0
+        },
+        {
+          "id": "mb120",
+          "en": "MetroBus AMTS + FCE, 120 minutes",
+          "it": "MetroBus AMTS + FCE, 120 minuti",
+          "price": 2.0,
+          "minutes": 120
+        },
+        {
+          "id": "mb24",
+          "en": "MetroBus AMTS + FCE, 24 hours",
+          "it": "MetroBus AMTS + FCE, 24 ore",
+          "price": 4.5
+        }
+      ],
+      "checked": "2026-11-18"
     },
     "genoa": {
       "operator": "AMT Genova",
