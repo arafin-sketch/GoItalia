@@ -13,6 +13,7 @@ const store = {
 /* ================= i18n ================= */
 const STR = {
  en: {
+  home_tab: "Home", stations: "Stations", nearest: "Nearest stops", favourites: "Favourites", stop_code: "Stop {c}", walk_min: "{m} min walk", all_deps: "All departures", scheduled: "Scheduled", search_line: "Search for a line", alerts: "Alerts", recent_lines: "Recent", clear: "Clear", no_alerts: "No service alerts reported right now.", no_fav_stops: "No favourite stops yet. Tap the star on a stop to add it.", no_fav_lines: "No favourite lines yet. Tap the star on a line to add it.", show_more: "Show more", direction: "Direction", tap_stop: "Tap a stop to see when this line arrives there.", vehicles_now: n => n === 1 ? "1 vehicle on the line now" : `${n} vehicles on the line now`, no_lines: "No lines match your search.", loading_lines: "Loading lines…", n_alerts: n => n === 1 ? "1 service alert" : `${n} service alerts`, add_fav: "Add to favourites", remove_fav: "Remove from favourites", lines_at: "Lines", no_live_here: "No departures of this line in the next hour.", city: "City",
   plan: "Directions", nearby: "Nearby", where_to: "Where to?", set_home: "Set home", set_work: "Set work", save_place: "Save this destination", saved_places: "Saved places", remove: "Remove", share: "Share", copied: "Copied", install: "Install app", install_s: "Add ItaliaNow to your home screen.", sort_by: "Sort", set_hint: "Search for a place, then save it as Home or Work from the results.", lines: "Lines", saved: "Saved", more: "More",
   from: "From", to: "To", choose_start: "Choose start", choose_dest: "Choose destination", swap: "Swap start and destination",
   now: "Now", depart_at: "Depart at", arrive_by: "Arrive by", search: "Search routes", fewest: "Fewest changes", fastest: "Fastest",
@@ -50,6 +51,7 @@ const STR = {
   about: "About", lines_title: "Lines", stop_dep: "Departures", geo_err: "Search is unavailable right now. Showing stations from the built-in network.",
  },
  it: {
+  home_tab: "Home", stations: "Fermate", nearest: "Fermate più vicine", favourites: "Preferiti", stop_code: "Fermata {c}", walk_min: "{m} min a piedi", all_deps: "Tutte le partenze", scheduled: "Programmato", search_line: "Cerca una linea", alerts: "Avvisi", recent_lines: "Recenti", clear: "Cancella", no_alerts: "Nessun avviso di servizio al momento.", no_fav_stops: "Nessuna fermata preferita. Tocca la stella su una fermata per aggiungerla.", no_fav_lines: "Nessuna linea preferita. Tocca la stella su una linea per aggiungerla.", show_more: "Mostra altre", direction: "Direzione", tap_stop: "Tocca una fermata per vedere quando passa questa linea.", vehicles_now: n => n === 1 ? "1 mezzo in linea ora" : `${n} mezzi in linea ora`, no_lines: "Nessuna linea corrisponde alla ricerca.", loading_lines: "Caricamento linee…", n_alerts: n => n === 1 ? "1 avviso di servizio" : `${n} avvisi di servizio`, add_fav: "Aggiungi ai preferiti", remove_fav: "Rimuovi dai preferiti", lines_at: "Linee", no_live_here: "Nessun passaggio di questa linea nella prossima ora.", city: "Città",
   plan: "Percorso", nearby: "Vicino", where_to: "Dove vuoi andare?", set_home: "Imposta casa", set_work: "Imposta lavoro", save_place: "Salva questa destinazione", saved_places: "Luoghi salvati", remove: "Rimuovi", share: "Condividi", copied: "Copiato", install: "Installa app", install_s: "Aggiungi ItaliaNow alla schermata Home.", sort_by: "Ordina", set_hint: "Cerca un luogo, poi salvalo come Casa o Lavoro dai risultati.", lines: "Linee", saved: "Salvati", more: "Altro",
   from: "Da", to: "A", choose_start: "Scegli partenza", choose_dest: "Scegli destinazione", swap: "Inverti partenza e destinazione",
   now: "Adesso", depart_at: "Parti alle", arrive_by: "Arriva entro", search: "Cerca percorsi", fewest: "Meno cambi", fastest: "Più veloce",
@@ -98,6 +100,8 @@ const S = {
   nearby: { center: null, stops: [], loading: false, error: null, updated: null },
   apiDown: false, strike: null, picking: null, planResult: null,
   modeFilter: store.get("modeFilter", "all"), tripRefs: [], vehicles: [],
+  stationsTab: "nearby", favStops: store.get("favStops", []), favLines: store.get("favLines", []), recentLines: store.get("recentLines", []),
+  lineTab: "all", lineQ: "", linesShown: 60, alerts: new Map(), favData: {}, lineFocus: null,
 };
 /* transport categories used by filters, colours and icons */
 const CATS = ["all", "bus", "metro", "tram", "train", "ferry", "other"];
@@ -171,7 +175,7 @@ function chip(name, color, mode, sm) {
 }
 const liveName = n => { const m = /^ME([ABC]1?)$/.exec(n || ""); return m ? m[1] : (n || ""); };
 const liveMode = m => m === "SUBWAY" ? "metro" : m;
-function titleish(n) { n = String(n || "").replace(/\s*#\s*\w+$/, "").replace(/^[A-Z' ]{3,}\s*\|\s*/, ""); const tc = n === n.toUpperCase() ? n.toLowerCase().replace(/(^|[\s(/'.-])\p{L}/gu, m => m.toUpperCase()) : n; return tc.replace(/\(([A-Za-z]{2}(?:\s?-\s?[A-Za-z]{2})*)\)/g, (m, g) => "(" + g.toUpperCase() + ")"); }
+function titleish(n) { n = String(n || "").replace(/\s*#\s*\w+$/, "").replace(/^[A-Z' ]{3,}\s*\|\s*/, ""); const tc = n === n.toUpperCase() ? n.toLowerCase().replace(/(^|[\s(/'-])\p{L}/gu, m => m.toUpperCase()) : n; return tc.replace(/\(([A-Za-z]{2}(?:\s?-\s?[A-Za-z]{2})*)\)/g, (m, g) => "(" + g.toUpperCase() + ")"); }
 function hav(a, b) { const R = 6371000, r = Math.PI / 180; const dLa = (b[0] - a[0]) * r, dLo = (b[1] - a[1]) * r; const h = Math.sin(dLa / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dLo / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); }
 
 /* ================= API client: timeout, retry with backoff, cache, concurrency limit ================= */
@@ -342,11 +346,13 @@ function drawVehicles() {
   const now = Date.now(); const seen = new Set(); const feats = [];
   for (const v of S.vehicles) {
     if (now > v.arr + 30000 || now < v.dep - 60000) continue;
+    if (S.lineFocus && (v.name !== S.lineFocus.name || v.cat !== S.lineFocus.cat)) continue;
     if (v.tripId) { if (seen.has(v.tripId)) continue; seen.add(v.tripId); }
     const [la, lo] = vehiclePos(v, now);
     feats.push({ type: "Feature", properties: { color: v.color, cat: v.cat, name: v.name, tripId: v.tripId || "", mode: v.mode, rawColor: v.rawColor }, geometry: { type: "Point", coordinates: [lo, la] } });
   }
   map.getSource("vehicles").setData({ type: "FeatureCollection", features: feats });
+  updateVehCount();
 }
 function startVehicles() {
   clearInterval(vehTimer); clearInterval(vehAnim);
@@ -376,11 +382,11 @@ function initMap() {
   map.on("click", "veh", e => {
     const p = e.features?.[0]?.properties; if (!p || !p.tripId) return;
     S.prev = { tab: S.tab, view: S.view, params: S.params };
-    go("nearby", "trip", { ref: { tripId: p.tripId, name: p.name, color: p.rawColor, mode: p.mode }, back: "trip-back" });
+    go(S.tab, "trip", { ref: { tripId: p.tripId, name: p.name, color: p.rawColor, mode: p.mode }, back: "trip-back" });
   });
   map.on("mouseenter", "veh", () => { map.getCanvas().style.cursor = "pointer"; });
   map.on("mouseleave", "veh", () => { map.getCanvas().style.cursor = ""; });
-  map.on("moveend", e => { if (S.tab === "nearby" && !S.view && e.originalEvent && S.nearby.center && hav([map.getCenter().lat, map.getCenter().lng], S.nearby.center) > 300) { const b = $("#hereBtn"); b.innerHTML = I.search + esc(t("search_here")); b.hidden = false; } });
+  map.on("moveend", e => { if (["nearby", "home"].includes(S.tab) && !S.view && e.originalEvent && S.nearby.center && hav([map.getCenter().lat, map.getCenter().lng], S.nearby.center) > 300) { const b = $("#hereBtn"); b.innerHTML = I.search + esc(t("search_here")); b.hidden = false; } });
 }
 function refreshMapStyle() { if (!map) return; const s = styleUrl(); if (s !== currentStyle) { currentStyle = s; mapReady = false; map.setStyle(s); } }
 function setJourney(fc) { overlay.journey = fc; overlay.dim = fc.features.length > 0 || overlay.focus.features.length > 0; if (mapReady) { map.getSource("journey").setData(fc); applyDim(); } }
@@ -429,7 +435,8 @@ function renderBadge() {
     ? `<span class="badge off" role="status"><span class="dot"></span>${t("offline")}</span>`
     : `<span class="badge live" role="status"><span class="dot"></span>${t("live")}</span>`;
 }
-function noteAlerts(alerts) {
+function noteAlerts(alerts, line) {
+  for (const a of alerts || []) { const h = (a.headerText || "").trim(); if (!h) continue; const k = h + "|" + (a.descriptionText || "").slice(0, 60); const e = S.alerts.get(k) || { h, d: a.descriptionText || "", cause: a.cause, effect: a.effect, lines: new Set(), start: a.impactPeriod?.[0]?.start, end: a.impactPeriod?.[0]?.end }; if (line) e.lines.add(line); S.alerts.set(k, e); }
   for (const a of alerts || []) if (a.cause === "STRIKE") { const st = a.impactPeriod?.[0]?.start; if (st && (!S.strike || new Date(st) < new Date(S.strike.start))) { S.strike = { h: a.headerText, start: st, end: a.impactPeriod[0].end }; renderStrike(); } }
 }
 function renderStrike() {
@@ -442,10 +449,11 @@ function renderStrike() {
   $("#strikeSlot").innerHTML = html;
 }
 function renderNav() {
-  const tabs = [["nearby", I.near], ["plan", I.route], ["lines", I.lines], ["more", I.more]];
-  $("#nav").innerHTML = tabs.map(([k, ic]) => `<button data-tab="${k}" ${S.tab === k ? 'aria-current="page"' : ""}><i>${ic}</i>${t(k)}</button>`).join("");
+  const tabs = [["home", I.route, "home_tab"], ["nearby", I.loc, "stations"], ["lines", I.lines, "lines"], ["more", I.more, "more"]];
+  const cur = S.tab === "plan" ? "home" : S.tab;
+  $("#nav").innerHTML = tabs.map(([k, ic, l]) => `<button data-tab="${k}" ${cur === k ? 'aria-current="page"' : ""}><i>${ic}</i>${t(l)}</button>`).join("");
 }
-addEventListener("online", () => { S.apiDown = false; renderBadge(); if (S.tab === "nearby") loadNearby(); });
+addEventListener("online", () => { S.apiDown = false; renderBadge(); if (["nearby", "home"].includes(S.tab)) loadNearby(); });
 addEventListener("offline", renderBadge);
 
 /* ================= location ================= */
@@ -483,18 +491,18 @@ function showOnboarding() {
 }
 async function startWithLocation(ask) {
   $("#overlay").innerHTML = "";
-  if (ask) { S.nearby.loading = true; go("nearby"); const pos = await getLocation(); if (pos) { showMe(); watchLocation(); } }
+  if (ask) { S.nearby.loading = true; go("home"); const pos = await getLocation(); if (pos) { showMe(); watchLocation(); } }
   const c = S.me || CFG.DEFAULT_CENTER; flyTo(c[0], c[1], 16); loadNearby(c);
 }
 
 /* ================= nearby (live) ================= */
 let refreshTimer = null, nearbyReq = 0;
 function stopRefresh() { clearInterval(refreshTimer); refreshTimer = null; }
-function startRefresh() { stopRefresh(); refreshTimer = setInterval(() => { if (document.visibilityState !== "visible" || S.tab !== "nearby") return; if (S.view === "trip") render(); else loadNearby(S.nearby.center, true); }, CFG.REFRESH_SECONDS * 1000); }
-document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.tab === "nearby" && S.nearby.updated && Date.now() - S.nearby.updated > CFG.REFRESH_SECONDS * 1000) loadNearby(S.nearby.center, true); });
+function startRefresh() { stopRefresh(); refreshTimer = setInterval(() => { if (document.visibilityState !== "visible") return; if (S.view === "trip") return render(); if (!["nearby", "home"].includes(S.tab)) return; if (S.tab === "nearby" && S.stationsTab === "fav" && !S.view) return loadFavourites(true); loadNearby(S.nearby.center, true); }, CFG.REFRESH_SECONDS * 1000); }
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && ["nearby", "home"].includes(S.tab) && S.nearby.updated && Date.now() - S.nearby.updated > CFG.REFRESH_SECONDS * 1000) loadNearby(S.nearby.center, true); });
 async function loadNearby(center = S.nearby.center || S.me || CFG.DEFAULT_CENTER, silent = false) {
   const id = ++nearbyReq; S.nearby.center = center; S.nearby.loading = true; S.nearby.error = null; $("#hereBtn").hidden = true;
-  if (!silent && S.tab === "nearby" && !S.view) render(); else updateRefreshLine();
+  if (!silent && ["nearby", "home"].includes(S.tab) && !S.view) render(); else updateRefreshLine();
   const R = CFG.NEARBY_RADIUS_M, dLa = R / 111320, dLo = R / (111320 * Math.cos(center[0] * Math.PI / 180));
   try {
     const raw = await api.get("/api/v1/map/stops", { min: `${center[0] - dLa},${center[1] - dLo}`, max: `${center[0] + dLa},${center[1] + dLo}` }, { ttl: 300 });
@@ -508,15 +516,23 @@ async function loadNearby(center = S.nearby.center || S.me || CFG.DEFAULT_CENTER
     for (const s of sorted) { if (picked.length >= 12) break; if (!picked.includes(s)) picked.push(s); }
     picked.sort((a, b) => a.distance - b.distance);
     const results = await Promise.all(picked.map(async s => {
-      try { const r = await api.get("/api/v1/stoptimes", { stopId: s.parentId || s.stopId, n: 14 }, { ttl: CFG.CACHE_SECONDS }); for (const x of r.stopTimes || []) noteAlerts(x.place?.alerts); return { ...s, times: r.stopTimes || [] }; }
+      try { const r = await api.get("/api/v1/stoptimes", { stopId: s.parentId || s.stopId, n: 14 }, { ttl: CFG.CACHE_SECONDS }); for (const x of r.stopTimes || []) noteAlerts(x.place?.alerts, liveName(x.displayName || x.routeShortName)); return { ...s, times: r.stopTimes || [] }; }
       catch { return { ...s, times: null }; }
     }));
     if (id !== nearbyReq) return;
     if (results.length && results.every(r => r.times === null)) throw new Error("all failed");
+    for (let a = 0; a < results.length; a++) for (let b = results.length - 1; b > a; b--) {
+      const A = results[a], B = results[b];
+      if (norm(titleish(A.name)) === norm(titleish(B.name)) && hav([A.lat, A.lon], [B.lat, B.lon]) < 300) {
+        const seen = new Set((A.times || []).map(x => x.tripId + x.place.departure));
+        A.times = [...(A.times || []), ...(B.times || []).filter(x => !seen.has(x.tripId + x.place.departure))].sort((x, y) => new Date(x.place.departure || x.place.arrival) - new Date(y.place.departure || y.place.arrival));
+        A.modes = [...new Set([...(A.modes || []), ...(B.modes || [])])]; results.splice(b, 1);
+      }
+    }
     S.nearby.stops = results; S.nearby.updated = Date.now(); S.nearby.error = null;
   } catch (e) { if (id !== nearbyReq) return; S.nearby.error = e.message || "error"; }
   S.nearby.loading = false;
-  if (S.tab === "nearby" && !S.view) render();
+  if (["nearby", "home"].includes(S.tab) && !S.view && !(S.tab === "nearby" && S.stationsTab === "fav")) { const sc = body.scrollTop, car = $("#carousel")?.scrollLeft; render(); body.scrollTop = sc; if (car && $("#carousel")) $("#carousel").scrollLeft = car; }
   startRefresh();
 }
 function updateRefreshLine() { const el = $("#refreshLine"); if (el) el.innerHTML = refreshLine(); }
@@ -527,7 +543,8 @@ function minutesUntil(iso) { return Math.round((new Date(iso) - Date.now()) / 60
 function depTimeHtml(x) {
   const p = x.place || x; const dep = p.departure || p.arrival, sd = p.scheduledDeparture || p.scheduledArrival;
   const m = minutesUntil(dep); const cancelled = p.cancelled || x.cancelled;
-  const big = m <= 0 ? `<span class="minutes">${t("due")}</span>` : m < 60 ? `<span class="minutes tnum">${nf(m)}<small>${t("min")}</small></span>` : `<span class="minutes tnum">${fmtTime(new Date(dep))}</span>`;
+  const rt = x.realTime ? `<span class="rtw" title="${t("live")}">${liveIcon}</span>` : "";
+  const big = m <= 0 ? `<span class="minutes ${x.realTime ? "is-rt" : ""}">${rt}${t("due")}</span>` : m < 60 ? `<span class="minutes tnum ${x.realTime ? "is-rt" : ""}">${rt}${nf(m)}<small>${t("min")}</small></span>` : `<span class="minutes tnum">${fmtTime(new Date(dep))}</span>`;
   const shifted = x.realTime && Math.abs(new Date(dep) - new Date(sd)) >= 60000;
   return `<div class="tm tnum">${big}<span class="small muted">${fmtTime(new Date(dep))}${shifted ? ` <s>${fmtTime(new Date(sd))}</s>` : ""}</span>${delayBadge(sd, dep, x.realTime, cancelled)}</div>`;
 }
@@ -564,40 +581,104 @@ function modeChips(available) {
   const cats = CATS.filter(c => c === "all" || available.has(c));
   return `<div class="chips" role="group" aria-label="Filter">${cats.map(c => `<button class="chip" data-mode="${c}" aria-pressed="${S.modeFilter === c}">${c === "all" ? "" : modeIcon({ bus: "BUS", metro: "SUBWAY", tram: "TRAM", train: "RAIL", ferry: "FERRY", other: "FUNICULAR" }[c])}${t(c)}</button>`).join("")}</div>`;
 }
-function renderNearby(el) {
-  if (S.view === "stop") return renderStop(el);
-  if (S.view === "trip") return renderTrip(el);
-  const n = S.nearby, R = CFG.NEARBY_RADIUS_M;
-  let html = `<button class="whereto" data-act="where-to">${I.search}<span>${t("where_to")}</span></button>
-    ${S.home || S.work ? `<div class="chips" style="padding-top:8px">${S.home ? `<button class="chip" data-act="go-home">${I.home}${t("home")}</button>` : ""}${S.work ? `<button class="chip" data-act="go-work">${I.work}${t("work")}</button>` : ""}</div>` : ""}
-    <h2 class="title" style="margin-top:14px">${t("nearby_title")}</h2>`;
+const CAT_ICON = { bus: "BUS", metro: "SUBWAY", tram: "TRAM", train: "RAIL", ferry: "FERRY", other: "FUNICULAR" };
+const stopKey = s => s.parentId || s.stopId;
+const isFavStop = s => S.favStops.some(f => f.id === stopKey(s));
+const starIcon = on => `<svg width="20" height="20" viewBox="0 0 24 24" ${on ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"'} aria-hidden="true"><path d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.4 14l-1.6 7z"/></svg>`;
+const liveIcon = '<svg class="rt" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M5 19a1 1 0 1 0 0-.01M5 12a7 7 0 0 1 7 7M5 5a14 14 0 0 1 14 14"/></svg>';
+let stopSrc = []; // stops shown on the current screen, referenced by data-i
+/* one stop as a card: name, stop code, walking time, lines served, next departures grouped by line */
+function stopCard(s, maxRows = 5) {
+  const i = stopSrc.push(s) - 1;
+  const cats = [...new Set((s.modes || []).map(modeCat))];
+  const lineNames = [...new Map((s.times || []).map(x => [liveName(x.displayName || x.routeShortName), x])).values()];
+  const groups = s.times ? depGroups(s.times) : [];
+  const walk = s.distance != null ? Math.max(1, Math.round(s.distance * 1.3 / 80)) : null;
+  const sub = [s.stopCode ? t("stop_code", { c: esc(s.stopCode) }) : "", walk ? t("walk_min", { m: nf(walk) }) : ""].filter(Boolean).join(" · ");
+  return `<div class="stop-card">
+    <div class="stop-head2"><span class="sq" style="background:#${CAT_COLOR[cats[0] || "bus"]}">${modeIcon(CAT_ICON[cats[0] || "bus"])}</span>
+      <button class="sh-main" data-act="open-stop" data-i="${i}"><b>${esc(titleish(s.name))}</b>${sub ? `<small>${sub}</small>` : ""}</button>
+      <button class="iconbtn star ${isFavStop(s) ? "on" : ""}" data-act="fav-stop" data-i="${i}" aria-label="${t(isFavStop(s) ? "remove_fav" : "add_fav")}" aria-pressed="${isFavStop(s)}">${starIcon(isFavStop(s))}</button></div>
+    ${lineNames.length ? `<div class="served">${lineNames.slice(0, 8).map(x => chip(liveName(x.displayName || x.routeShortName), liveColor(x.routeColor, x.mode), liveMode(x.mode), true)).join("")}${lineNames.length > 8 ? `<span class="more-n">+${lineNames.length - 8}</span>` : ""}</div>` : ""}
+    ${s.times === null ? `<div class="dep"><span></span><div class="hd muted">${t("err_title")}</div><span></span></div>` : groups.length ? groups.slice(0, maxRows).map(groupRow).join("") : `<div class="dep"><span></span><div class="hd muted">${t("no_service")}</div><span></span></div>`}
+    <button class="viewall" data-act="open-stop" data-i="${i}">${t("all_deps")}</button></div>`;
+}
+function nearbyStatus() {
+  let html = "";
   if (S.locState === "denied") html += `<div class="alert" role="status">${I.near}<span>${t("loc_denied")}</span></div>`;
   else if (S.locState === "error") html += `<div class="alert" role="status">${I.near}<span>${t("loc_err")}</span></div>`;
   else if (S.locState === "asking") html += `<div class="snap">${I.near}${t("locating")}</div>`;
-  html += `<div class="refresh" id="refreshLine" aria-live="polite">${refreshLine()}</div>`;
-  if (n.error && !n.stops.length) {
-    html += `<div class="err">${I.off.replace("<svg", '<svg width="40" height="40"')}<b>${t("err_title")}</b><span>${t("err_body")}</span><button class="btn tonal" data-act="nearby-retry">${t("retry")}</button></div>`;
-    if (NET) html += nearbyOffline(n.center || CFG.DEFAULT_CENTER);
-  } else if (n.loading && !n.stops.length) {
-    html += `<div class="list" aria-busy="true"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>`;
-  } else if (!n.stops.length) {
-    html += `<div class="empty">${I.near}<b>${t("no_stops", { r: R })}</b>${t("no_stops_s")}</div>`;
-  } else {
-    S.tripRefs = [];
+  return html;
+}
+function nearbyState(n, R) { // loading / error / empty, or "" when there are stops to show
+  if (n.error && !n.stops.length) return `<div class="err">${I.off.replace("<svg", '<svg width="40" height="40"')}<b>${t("err_title")}</b><span>${t("err_body")}</span><button class="btn tonal" data-act="nearby-retry">${t("retry")}</button></div>` + (NET ? nearbyOffline(n.center || CFG.DEFAULT_CENTER) : "");
+  if (n.loading && !n.stops.length) return `<div class="list" aria-busy="true"><div class="skel"></div><div class="skel"></div></div>`;
+  if (!n.stops.length) return `<div class="empty">${I.near}<b>${t("no_stops", { r: R })}</b>${t("no_stops_s")}</div>`;
+  return "";
+}
+function stopMarkers(list) {
+  list.forEach(s => { const m = (s.modes || [])[0]; if (S.modeFilter !== "all" && !(s.modes || []).some(x => modeCat(x) === S.modeFilter)) return;
+    const mk = addMarker(s.lat, s.lon, "mk-stop", modeIcon(m), () => { stopSrc = [s]; go(S.tab === "home" ? "home" : "nearby", "stop", { s }); }, titleish(s.name)); mk.style.background = "#" + CAT_COLOR[modeCat(m)]; });
+}
+/* HOME: search, saved places, nearest stops as swipeable cards, service alerts */
+function renderHome(el) {
+  if (S.view === "stop") return renderStop(el);
+  if (S.view === "trip") return renderTrip(el);
+  stopSrc = []; S.tripRefs = [];
+  const n = S.nearby, R = CFG.NEARBY_RADIUS_M;
+  let html = `<button class="whereto big" data-act="where-to">${I.search}<span>${t("where_to")}</span></button>
+    <div class="chips" style="padding-top:8px"><button class="chip" data-act="${S.home ? "go-home" : "hint-home"}">${I.home}${S.home ? t("home") : t("set_home")}</button><button class="chip" data-act="${S.work ? "go-work" : "hint-home"}">${I.work}${S.work ? t("work") : t("set_work")}</button></div>
+    <div class="row" style="justify-content:space-between;margin-top:14px"><h2 class="title" style="margin:0">${t("nearest")}</h2><button class="iconbtn" data-act="nearby-retry" aria-label="${t("updating")}"><span class="ring ${n.loading ? "spin" : ""}" style="width:18px;height:18px"></span></button></div>
+    ${nearbyStatus()}<div class="refresh" id="refreshLine" aria-live="polite">${refreshLine()}</div>`;
+  const state = nearbyState(n, R);
+  if (state) html += state;
+  else {
+    const top = n.stops.filter(s => s.times && s.times.length).slice(0, 6);
+    html += `<div class="carousel" id="carousel">${top.map(s => `<div class="slide">${stopCard(s, 3)}</div>`).join("")}</div>
+      <div class="dots" aria-hidden="true">${top.map((_, k) => `<i class="${k === 0 ? "on" : ""}"></i>`).join("")}</div>`;
+  }
+  if (S.alerts.size) html += `<button class="card alertcard" data-act="open-alerts">${I.warn}<span><b>${t("n_alerts", S.alerts.size)}</b><small>${esc([...S.alerts.values()][0].h)}</small></span>${I.chev}</button>`;
+  el.innerHTML = html;
+  const car = $("#carousel");
+  if (car) car.addEventListener("scroll", () => { const k = Math.round(car.scrollLeft / car.clientWidth); [...el.querySelectorAll(".dots i")].forEach((d, j) => d.classList.toggle("on", j === k)); }, { passive: true });
+  clearMarkers(); showMe(); stopMarkers(n.stops);
+}
+/* STATIONS: every stop nearby, or your favourite stops */
+function renderNearby(el) {
+  if (S.view === "stop") return renderStop(el);
+  if (S.view === "trip") return renderTrip(el);
+  stopSrc = []; S.tripRefs = [];
+  const n = S.nearby, R = CFG.NEARBY_RADIUS_M;
+  let html = `<div class="tabs2" role="tablist"><button role="tab" data-st="nearby" aria-selected="${S.stationsTab === "nearby"}">${t("nearby")}</button><button role="tab" data-st="fav" aria-selected="${S.stationsTab === "fav"}">${t("favourites")}</button></div>`;
+  if (S.stationsTab === "fav") {
+    if (!S.favStops.length) html += `<div class="empty">${starIcon(false).replace('width="20" height="20"', 'width="40" height="40"')}<b>${t("favourites")}</b>${t("no_fav_stops")}</div>`;
+    else html += `<div class="list">${S.favStops.map(f => { const d = S.favData[f.id]; const s = { ...f, stopId: f.id, distance: S.me ? hav(S.me, [f.lat, f.lon]) : null, times: d === undefined ? [] : d }; return d === undefined ? `<div class="skel"></div>` : stopCard(s, 4); }).join("")}</div>`;
+    el.innerHTML = html; clearMarkers(); showMe(); stopMarkers(S.favStops.map(f => ({ ...f, stopId: f.id })));
+    loadFavourites(); return;
+  }
+  html += nearbyStatus() + `<div class="refresh" id="refreshLine" aria-live="polite">${refreshLine()}</div>`;
+  const state = nearbyState(n, R);
+  if (state) html += state;
+  else {
     const avail = new Set(n.stops.flatMap(s => [...(s.modes || []), ...(s.times || []).map(x => x.mode)]).map(modeCat));
     html += modeChips(avail);
-    const cards = n.stops.map((s, i) => {
-      if (S.modeFilter !== "all" && !(s.modes || []).some(m => modeCat(m) === S.modeFilter) && !(s.times || []).some(x => passFilter(x.mode))) return "";
-      const groups = s.times ? depGroups(s.times) : [];
-      const icons = [...new Set((s.modes || []).map(modeCat))].slice(0, 3).map(c => `<span class="lc sm" style="background:#${CAT_COLOR[c]};color:#fff" aria-label="${t(c)}">${modeIcon({ bus: "BUS", metro: "SUBWAY", tram: "TRAM", train: "RAIL", ferry: "FERRY", other: "FUNICULAR" }[c])}</span>`).join("");
-      return `<div class="stop-card"><div class="stop-head">${icons}<b>${esc(titleish(s.name))}</b><span class="muted small tnum">${fmtDist(s.distance)}</span><button data-act="open-stop" data-i="${i}" aria-label="${t("stop_dep")} ${esc(titleish(s.name))}">${I.chev}</button></div>
-      ${s.times === null ? `<div class="dep"><span></span><div class="hd muted">${t("err_title")}</div><span></span></div>` : groups.length ? groups.slice(0, 5).map(groupRow).join("") : `<div class="dep"><span></span><div class="hd muted">${t("no_service")}</div><span></span></div>`}</div>`;
-    }).join("");
+    const cards = n.stops.filter(s => S.modeFilter === "all" || (s.modes || []).some(m => modeCat(m) === S.modeFilter) || (s.times || []).some(x => passFilter(x.mode))).map(s => stopCard(s, 4)).join("");
     html += cards ? `<div class="list">${cards}</div>` : `<div class="empty">${I.near}<b>${t("no_stops", { r: R })}</b></div>`;
   }
   el.innerHTML = html;
-  clearMarkers(); showMe();
-  n.stops.forEach((s, i) => { const m = (s.modes || [])[0]; if (S.modeFilter !== "all" && !(s.modes || []).some(x => modeCat(x) === S.modeFilter)) return; const mk = addMarker(s.lat, s.lon, "mk-stop", modeIcon(m), () => go("nearby", "stop", { i }), titleish(s.name)); mk.style.background = "#" + CAT_COLOR[modeCat(m)]; });
+  clearMarkers(); showMe(); stopMarkers(n.stops);
+}
+let favLoading = false;
+async function loadFavourites(force) {
+  if (favLoading) return; favLoading = true;
+  let changed = false;
+  await Promise.all(S.favStops.map(async f => {
+    if (!force && S.favData[f.id] !== undefined) return;
+    try { const r = await api.get("/api/v1/stoptimes", { stopId: f.id, n: 14 }); S.favData[f.id] = r.stopTimes || []; } catch { S.favData[f.id] = null; }
+    changed = true;
+  }));
+  favLoading = false;
+  if (changed && S.tab === "nearby" && S.stationsTab === "fav" && !S.view) render();
 }
 
 /* trip page: every stop of one bus / tram / metro / train run, with live times */
@@ -629,11 +710,13 @@ async function renderTrip(el) {
   }
 }
 function renderStop(el) {
-  const s = S.nearby.stops[S.params.i]; if (!s) return go("nearby");
-  el.innerHTML = `<button class="back" data-act="to-nearby">${I.back}${t("back")}</button><h2 class="title">${esc(titleish(s.name))}</h2>
-    <p class="muted small" style="margin:-6px 0 8px">${fmtDist(s.distance)}</p><div class="refresh" id="refreshLine">${refreshLine()}</div>
+  const s = S.params.s; if (!s) return go(S.tab);
+  stopSrc = [s];
+  el.innerHTML = `<button class="back" data-act="stop-back">${I.back}${t("back")}</button>
+    <div class="row" style="flex-wrap:nowrap"><h2 class="title" style="flex:1;min-width:0;margin-bottom:4px">${esc(titleish(s.name))}</h2><button class="iconbtn star ${isFavStop(s) ? "on" : ""}" data-act="fav-stop" data-i="0" aria-pressed="${isFavStop(s)}" aria-label="${t(isFavStop(s) ? "remove_fav" : "add_fav")}">${starIcon(isFavStop(s))}</button></div>
+    <p class="muted small" style="margin:0 0 8px">${[s.stopCode ? t("stop_code", { c: esc(s.stopCode) }) : "", s.distance != null ? fmtDist(s.distance) : ""].filter(Boolean).join(" · ")}</p><div class="refresh" id="refreshLine">${refreshLine()}</div>
     ${(() => { S.tripRefs = []; const avail = new Set((s.times || []).map(x => modeCat(x.mode))); return avail.size > 1 ? modeChips(avail) : ""; })()}
-    <div class="stop-card">${(s.times || []).filter(x => passFilter(x.mode)).map(depRow).join("") || `<div class="dep"><span></span><div class="hd muted">${t("no_service")}</div><span></span></div>`}</div>
+    <div class="stop-card">${(s.times || []).filter(x => passFilter(x.mode) && minutesUntil(x.place.departure || x.place.arrival) > -2).map(depRow).join("") || `<div class="dep"><span></span><div class="hd muted">${t("no_service")}</div><span></span></div>`}</div>
     <div class="row" style="margin-top:14px"><button class="btn tonal" data-act="stop-from">${t("from")}: ${esc(titleish(s.name))}</button><button class="btn tonal" data-act="stop-to">${t("to")}: ${esc(titleish(s.name))}</button></div>`;
   clearMarkers(); showMe(); addMarker(s.lat, s.lon, "mk-stop sel", modeIcon((s.modes || [])[0])); flyTo(s.lat, s.lon, 16.5);
 }
@@ -803,19 +886,104 @@ function renderDetail(el) {
 }
 
 /* ================= lines & stations ================= */
-function renderLines(el) {
-  if (S.view === "line") return renderLine(el);
-  if (S.view === "station") return renderStation(el);
-  const city = S.linesCity; const ls = NET.lines.filter(l => cityOf(l.id) === city);
-  const groups = ["metro", "rail", "tram", "funicular"].map(m => [m, ls.filter(l => l.mode === m)]).filter(g => g[1].length);
-  el.innerHTML = `<h2 class="title">${t("lines_title")}</h2><div class="chips" role="group">${NET.cities.map(c => `<button class="chip" data-city="${c.id}" aria-pressed="${c.id === city}">${esc(c.name)}</button>`).join("")}</div>
-    <div class="alert" style="background:var(--brand-soft);color:var(--on-brand-soft);margin-top:10px">${I.bus}<span>${t("lines_hint")}</span></div><p class="muted small" style="margin:8px 0 0">${esc(cityById[city].operator)} · ${t("net_stats", { l: nf(ls.length), s: nf(new Set(ls.flatMap(l => l.branches.flat())).size) })}</p>
-    ${groups.map(([m, arr]) => `<h3 class="sub">${t(m)}</h3>${arr.map(l => `<button class="line-row" data-line="${l.id}">${chip(lineName(l), l.color, l.mode)}<span style="min-width:0;flex:1"><span class="t" style="display:block">${esc(lineTermini(l))}</span><span class="s">${t("stops", new Set(l.branches.flat()).size)}${l.headways[2] ? ` · ${t("every", { m: nf(Math.round(l.headways[2])) })}` : ""}</span></span>${I.chev}</button>`).join("")}`).join("")}`;
-  clearMarkers(); showMe();
-  const pts = ls.filter(l => l.mode !== "tram").flatMap(l => l.branches.flat().map(s => [stations[s].lat, stations[s].lon])); fit(pts, 13.5);
+/* ================= lines: every bus, tram, metro, rail line of a city ================= */
+const LIDX = {}; // city -> loaded index
+async function loadLineIndex(city) {
+  if (LIDX[city]) return LIDX[city];
+  const d = await (await fetch(`data/lines/${city}.json`)).json();
+  d.stops = d.stops.map(([n, la, lo, c]) => ({ name: n, lat: la / 1e5, lon: lo / 1e5, code: c }));
+  d.routes.forEach((r, i) => { r.i = i; r.cat = r.m === "rail" ? "train" : r.m === "funicular" ? "other" : r.m; r.sh = r.sh.map(a => { const o = []; for (let k = 0; k < a.length; k += 2) o.push([a[k] / 1e5, a[k + 1] / 1e5]); return o; }); });
+  return (LIDX[city] = d);
 }
+const LINE_CITIES = ["rome", "milan", "naples", "turin", "genoa", "catania"];
+function nearestCity() { const c = S.me || (map ? [map.getCenter().lat, map.getCenter().lng] : CFG.DEFAULT_CENTER); if (!NET) return "rome"; let best = "rome", bd = 1e12; for (const k of LINE_CITIES) { const d = hav(c, cityById[k].center); if (d < bd) { bd = d; best = k; } } return best; }
+const lineKey = (city, r) => `${city}|${r.id}`;
+const lineColor = r => r.c || CAT_COLOR[r.cat] || "5B6770";
+const lineChipMode = r => r.m === "metro" ? "metro" : r.m === "rail" ? "RAIL" : r.m === "tram" ? "TRAM" : r.m === "ferry" ? "FERRY" : r.m === "funicular" ? "FUNICULAR" : "BUS";
+const alertsForLine = name => [...S.alerts.values()].filter(a => a.lines.has(name));
+function lineRow(city, r) {
+  const al = alertsForLine(r.s).length;
+  return `<button class="line-row" data-lr="${city}|${r.i}">${chip(r.s, lineColor(r), lineChipMode(r))}<span style="min-width:0;flex:1"><span class="t" style="display:block">${esc(r.l)}</span></span>${al ? `<span class="info-dot" aria-label="${t("alerts")}">!</span>` : ""}${I.chev}</button>`;
+}
+function renderLines(el) {
+  if (S.view === "lx") return renderLineX(el);
+  if (S.view === "line") return renderNetLine(el);
+  if (S.view === "station") return renderStation(el);
+  if (!S.linesCity || !LINE_CITIES.includes(S.linesCity)) S.linesCity = nearestCity();
+  const city = S.linesCity, idx = LIDX[city];
+  const tabs = [["alerts", t("alerts")], ["fav", "★"], ["all", t("all")], ["bus", t("bus")], ["metro", t("metro")], ["tram", t("tram")], ["train", t("train")], ["other", t("funicular")], ["ferry", t("ferry")]]
+    .filter(([k]) => !idx || ["alerts", "fav", "all"].includes(k) || idx.routes.some(r => r.cat === k));
+  el.innerHTML = `<label class="lsearch">${I.search}<input id="lineQ" type="search" autocomplete="off" placeholder="${t("search_line")}" aria-label="${t("search_line")}" value="${esc(S.lineQ)}"></label>
+    <div class="chips" role="group" aria-label="${t("city")}">${LINE_CITIES.map(c => `<button class="chip" data-city="${c}" aria-pressed="${c === city}">${esc(cityById[c]?.name || c)}</button>`).join("")}</div>
+    <div class="tabs2 scroll" role="tablist">${tabs.map(([k, l]) => `<button role="tab" data-ltab="${k}" aria-selected="${S.lineTab === k}">${l}</button>`).join("")}</div>
+    <div id="lineList">${idx ? "" : `<div class="snap">${t("loading_lines")}</div><div class="skel"></div>`}</div>`;
+  clearMarkers(); showMe(); setFocus(emptyFC);
+  const q = $("#lineQ"); q.addEventListener("input", () => { S.lineQ = q.value; S.linesShown = 60; fillLineList(); });
+  if (!idx) loadLineIndex(city).then(() => { if (S.tab === "lines" && !S.view && S.linesCity === city) render(); }).catch(() => { $("#lineList").innerHTML = `<div class="err"><b>${t("err_title")}</b><button class="btn tonal" data-act="lines-retry">${t("retry")}</button></div>`; });
+  else fillLineList();
+}
+function fillLineList() {
+  const box = $("#lineList"); const city = S.linesCity, idx = LIDX[city]; if (!box || !idx) return;
+  const q = norm(S.lineQ.trim());
+  if (S.lineTab === "alerts" && !q) {
+    const list = [...S.alerts.values()];
+    box.innerHTML = list.length ? `<div class="list">${list.map(a => `<div class="alertitem ${a.cause === "STRIKE" ? "strk" : ""}">${I.warn}<div><b>${esc(a.h)}</b>${a.lines.size ? `<div class="served">${[...a.lines].slice(0, 12).map(n => { const r = idx.routes.find(x => x.s === n); return r ? `<button class="chipbtn" data-lr="${city}|${r.i}">${chip(n, lineColor(r), lineChipMode(r), true)}</button>` : chip(n, "5B6770", "BUS", true); }).join("")}</div>` : ""}${a.d && a.d !== a.h ? `<p>${esc(a.d)}</p>` : ""}</div></div>`).join("")}</div>`
+      : `<div class="empty">${I.warn}<b>${t("alerts")}</b>${t("no_alerts")}</div>`;
+    return;
+  }
+  let routes = idx.routes;
+  if (S.lineTab === "fav") routes = routes.filter(r => S.favLines.includes(lineKey(city, r)));
+  else if (!["all", "alerts"].includes(S.lineTab)) routes = routes.filter(r => r.cat === S.lineTab);
+  if (q) routes = routes.filter(r => norm(r.s).startsWith(q) || norm(r.l).includes(q)).sort((a, b) => (norm(b.s) === q) - (norm(a.s) === q) || (norm(b.s).startsWith(q)) - (norm(a.s).startsWith(q)));
+  let html = "";
+  if (!q && S.lineTab === "all") {
+    const rec = S.recentLines.filter(k => k.startsWith(city + "|")).map(k => idx.routes.find(r => lineKey(city, r) === k)).filter(Boolean);
+    if (rec.length) html += `<div class="row" style="justify-content:space-between;margin-top:6px"><h3 class="sub" style="margin:8px 0">${t("recent_lines")}</h3><button class="btn text" data-act="clear-recent-lines">${t("clear")}</button></div><div class="list">${rec.map(r => lineRow(city, r)).join("")}</div><h3 class="sub">${t("all")}</h3>`;
+  }
+  if (S.lineTab === "fav" && !routes.length) html += `<div class="empty">${starIcon(false).replace('width="20" height="20"', 'width="40" height="40"')}<b>${t("favourites")}</b>${t("no_fav_lines")}</div>`;
+  else if (!routes.length) html += `<div class="empty"><b>${t("no_lines")}</b></div>`;
+  else html += `<div class="list">${routes.slice(0, S.linesShown).map(r => lineRow(city, r)).join("")}</div>${routes.length > S.linesShown ? `<button class="btn tonal" style="width:100%;margin-top:10px" data-act="more-lines">${t("show_more")} (${nf(routes.length - S.linesShown)})</button>` : ""}`;
+  box.innerHTML = html;
+}
+/* one line: stops of the chosen direction, live vehicles, next arrival at any stop */
+function renderLineX(el) {
+  const { city, i } = S.params; const idx = LIDX[city]; if (!idx) return go("lines");
+  const r = idx.routes[i]; const dir = Math.min(S.params.dir || 0, r.p.length - 1); const pat = r.p[dir]; const stops = pat.map(k => idx.stops[k]);
+  const key = lineKey(city, r); const fav = S.favLines.includes(key); const col = lineColor(r);
+  const al = alertsForLine(r.s);
+  S.lineFocus = { name: r.s, cat: r.cat }; drawVehicles();
+  el.innerHTML = `${backBtn("to-lines")}
+    <div class="row" style="flex-wrap:nowrap;gap:10px;margin:4px 0 2px">${chip(r.s, col, lineChipMode(r))}<h2 class="title" style="margin:0;font-size:18px;flex:1;min-width:0">${esc(r.l)}</h2><button class="iconbtn star ${fav ? "on" : ""}" data-act="fav-line" aria-pressed="${fav}" aria-label="${t(fav ? "remove_fav" : "add_fav")}">${starIcon(fav)}</button></div>
+    <p class="muted small" style="margin:0 0 10px">${esc(idx.operator)} · ${t(r.cat === "other" ? "funicular" : r.cat)} · <span id="vehCount"></span></p>
+    ${al.map(a => `<div class="alert ${a.cause === "STRIKE" ? "strk" : ""}">${I.warn}<span><b>${esc(a.h)}</b></span></div>`).join("")}
+    ${r.p.length > 1 ? `<div class="seg" role="group" aria-label="${t("direction")}" style="margin:8px 0">${r.p.map((p, k) => `<button data-dir="${k}" aria-pressed="${k === dir}">→ ${esc(idx.stops[p[p.length - 1]].name)}</button>`).join("")}</div>` : ""}
+    <p class="est" style="margin:6px 0 4px">${t("tap_stop")}</p>
+    <ol class="diagram" style="--c:#${col}">${stops.map((s, k) => `<li><span class="rail"><i></i></span><div><button data-ls="${k}"><span style="font-weight:600">${esc(s.name)}</span>${s.code ? `<small class="muted">${t("stop_code", { c: esc(s.code) })}</small>` : ""}</button><div class="lsdeps" id="ls${k}"></div></div></li>`).join("")}</ol>`;
+  clearMarkers(); showMe();
+  const shape = r.sh[dir]?.length > 1 ? r.sh[dir] : stops.map(s => [s.lat, s.lon]);
+  setFocus({ type: "FeatureCollection", features: [{ type: "Feature", properties: { color: "#" + col }, geometry: { type: "LineString", coordinates: shape.map(([a, b]) => [b, a]) } }] });
+  stops.forEach((s, k) => { const m = addMarker(s.lat, s.lon, "mk-end", "", () => showLineStop(k), s.name); Object.assign(m.style, { width: "11px", height: "11px", borderWidth: "3px", borderColor: "#" + col }); });
+  fit(shape, 15);
+  updateVehCount();
+}
+function updateVehCount() { const el = $("#vehCount"); if (!el || !S.lineFocus) return; const now = Date.now(); const n = new Set(S.vehicles.filter(v => v.name === S.lineFocus.name && v.cat === (S.lineFocus.cat === "other" ? "other" : S.lineFocus.cat) && now <= v.arr + 30000 && now >= v.dep - 60000).map(v => v.tripId)).size; el.textContent = t("vehicles_now", n); }
+async function showLineStop(k) {
+  const { city, i } = S.params; const idx = LIDX[city]; const r = idx.routes[i]; const dir = Math.min(S.params.dir || 0, r.p.length - 1);
+  const s = idx.stops[r.p[dir][k]]; const box = $("#ls" + k); if (!box) return;
+  box.innerHTML = `<div class="skel" style="height:44px"></div>`; flyTo(s.lat, s.lon, 16);
+  try {
+    const d = 0.0012; const raw = await api.get("/api/v1/map/stops", { min: `${s.lat - d},${s.lon - d}`, max: `${s.lat + d},${s.lon + d}` }, { ttl: 300 });
+    const cands = raw.sort((a, b) => (norm(titleish(b.name)) === norm(s.name)) - (norm(titleish(a.name)) === norm(s.name)) || hav([s.lat, s.lon], [a.lat, a.lon]) - hav([s.lat, s.lon], [b.lat, b.lon])).slice(0, 3);
+    let times = [];
+    for (const c of cands) { const res = await api.get("/api/v1/stoptimes", { stopId: c.parentId || c.stopId, n: 30 }); times = (res.stopTimes || []).filter(x => liveName(x.displayName || x.routeShortName) === r.s); if (times.length) break; }
+    const box2 = $("#ls" + k); if (!box2) return;
+    S.tripRefs = S.tripRefs || [];
+    box2.innerHTML = times.length ? `<div class="stop-card" style="margin:4px 0 8px">${times.slice(0, 3).map(depRow).join("")}</div>` : `<p class="small muted" style="margin:2px 0 8px">${t("no_live_here")}</p>`;
+  } catch { const b = $("#ls" + k); if (b) b.innerHTML = `<p class="small muted">${t("err_title")}</p>`; }
+}
+
 function lineFC(ids) { return { type: "FeatureCollection", features: networkFC().features.filter(f => ids.includes(f.properties.id)) }; }
-function renderLine(el) {
+function renderNetLine(el) {
   const L = lineById[S.params.id], bi = S.params.branch || 0, br = L.branches[bi];
   const maxHw = Math.max(...L.headways.filter(Boolean), 1); const bands = NET.timeBands.map(([a, b]) => `${String(a).padStart(2, "0")}–${String(b).padStart(2, "0")}`);
   el.innerHTML = `${backBtn("to-lines")}<div class="row" style="gap:12px;margin:4px 0">${chip(lineName(L), L.color, L.mode)}<h2 class="title" style="margin:0;font-size:19px;flex:1;min-width:0">${esc(lineTermini(L))}</h2></div>
@@ -913,10 +1081,11 @@ const body = $("#body");
 function go(tab, view = null, params = {}) { S.tab = tab; S.view = view; S.params = params; render(); }
 function render() {
   renderNav(); renderBadge(); renderStrike();
-  if (S.tab !== "nearby") $("#hereBtn").hidden = true;
+  if (!["nearby", "home"].includes(S.tab) || S.view) $("#hereBtn").hidden = true;
   if (!(S.tab === "plan" && (S.view === "results" || S.view === "detail"))) setJourney(emptyFC);
   if (!(S.tab === "lines" && S.view)) setFocus(emptyFC);
-  const v = { nearby: renderNearby, plan: renderPlan, lines: renderLines, saved: renderSaved, more: renderMore }[S.tab];
+  if (!(S.tab === "lines" && S.view === "lx") && S.lineFocus) { S.lineFocus = null; drawVehicles(); }
+  const v = S.view === "trip" ? renderTrip : S.view === "stop" ? renderStop : { home: renderHome, nearby: renderNearby, plan: renderPlan, lines: renderLines, more: renderMore }[S.tab];
   body.innerHTML = ""; const el = document.createElement("div"); el.className = "fade-in"; body.appendChild(el); v(el);
 }
 let toastT;
@@ -924,10 +1093,15 @@ function toast(msg) { clearTimeout(toastT); const o = $("#overlay"); if (o.query
 app.addEventListener("click", async e => {
   const b = e.target.closest("button,[data-act]"); if (!b) return; const d = b.dataset;
   if (d.obLang) { S.langPref = d.obLang; store.set("lang", d.obLang); document.documentElement.lang = lang(); showOnboarding(); return; }
-  if (d.tab) { S.focus = null; go(d.tab); if (d.tab === "nearby") { const c = S.nearby.center || S.me || CFG.DEFAULT_CENTER; flyTo(c[0], c[1], 16); if (!S.nearby.updated || Date.now() - S.nearby.updated > 20000) loadNearby(c); } return; }
+  if (d.tab) { S.focus = null; go(d.tab); if (d.tab === "nearby" || d.tab === "home") { const c = S.nearby.center || S.me || CFG.DEFAULT_CENTER; flyTo(c[0], c[1], 16); if (!S.nearby.updated || Date.now() - S.nearby.updated > 20000) loadNearby(c); } return; }
   if (d.mode) { S.modeFilter = d.mode; store.set("modeFilter", d.mode); applyVehicleFilter(); return render(); }
-  if (d.trip) { const ref = S.tripRefs[+d.trip]; if (!ref?.tripId) return; S.prev = { tab: S.tab, view: S.view, params: S.params }; return go("nearby", "trip", { ref, back: "trip-back" }); }
-  if (d.city) { S.linesCity = d.city; return render(); }
+  if (d.trip) { const ref = S.tripRefs[+d.trip]; if (!ref?.tripId) return; S.prev = { tab: S.tab, view: S.view, params: S.params }; return go(S.tab, "trip", { ref, back: "trip-back" }); }
+  if (d.city) { S.linesCity = d.city; S.lineQ = ""; S.linesShown = 60; return render(); }
+  if (d.st) { S.stationsTab = d.st; return render(); }
+  if (d.ltab) { S.lineTab = d.ltab; S.linesShown = 60; [...document.querySelectorAll("[data-ltab]")].forEach(x => x.setAttribute("aria-selected", x === b)); return fillLineList(); }
+  if (d.lr) { const [city, i] = d.lr.split("|"); const r = LIDX[city]?.routes[+i]; if (!r) return; const k = lineKey(city, r); S.recentLines = [k, ...S.recentLines.filter(x => x !== k)].slice(0, 12); store.set("recentLines", S.recentLines); S.tripRefs = []; return go("lines", "lx", { city, i: +i, dir: 0 }); }
+  if (d.dir) { S.params.dir = +d.dir; return render(); }
+  if (d.ls) return showLineStop(+d.ls);
   if (d.line) { S.linesCity = cityOf(d.line); return go("lines", "line", { id: d.line, branch: 0 }); }
   if (d.branch) { S.params.branch = +d.branch; return render(); }
   if (d.station) return go("lines", "station", { sid: d.station, fromLine: S.params.id || S.params.fromLine });
@@ -953,8 +1127,18 @@ app.addEventListener("click", async e => {
     case "trip-back": { const p = S.prev || { tab: "nearby" }; S.prev = null; return go(p.tab, p.view, p.params); }
     case "retry-trip": S.apiDown = false; return render();
     case "nearby-retry": S.apiDown = false; return loadNearby(S.nearby.center);
-    case "open-stop": return go("nearby", "stop", { i: +d.i });
-    case "stop-from": case "stop-to": { const s = S.nearby.stops[S.params.i]; S[d.act === "stop-from" ? "from" : "to"] = { kind: "stop", id: s.parentId || s.stopId, name: titleish(s.name), lat: s.lat, lon: s.lon }; return go("plan"); }
+    case "open-stop": { const st = stopSrc[+d.i]; if (!st) return; S.prevStop = { tab: S.tab, view: S.view, params: S.params }; return go(S.tab, "stop", { s: st }); }
+    case "stop-back": { const p = S.prevStop || { tab: S.tab }; S.prevStop = null; return go(p.tab, p.view, p.params); }
+    case "fav-stop": { const st = stopSrc[+d.i]; if (!st) return; const id = stopKey(st);
+      if (S.favStops.some(f => f.id === id)) S.favStops = S.favStops.filter(f => f.id !== id);
+      else { S.favStops = [...S.favStops, { id, name: titleish(st.name), lat: st.lat, lon: st.lon, modes: st.modes || [], stopCode: st.stopCode || "" }]; S.favData[id] = st.times || undefined; }
+      store.set("favStops", S.favStops); return render(); }
+    case "fav-line": { const { city, i } = S.params; const k = lineKey(city, LIDX[city].routes[i]); S.favLines = S.favLines.includes(k) ? S.favLines.filter(x => x !== k) : [...S.favLines, k]; store.set("favLines", S.favLines); return render(); }
+    case "open-alerts": S.lineTab = "alerts"; return go("lines");
+    case "clear-recent-lines": S.recentLines = S.recentLines.filter(k => !k.startsWith(S.linesCity + "|")); store.set("recentLines", S.recentLines); return fillLineList();
+    case "more-lines": S.linesShown += 100; return fillLineList();
+    case "lines-retry": return render();
+    case "stop-from": case "stop-to": { const s = S.params.s; S[d.act === "stop-from" ? "from" : "to"] = { kind: "stop", id: s.parentId || s.stopId, name: titleish(s.name), lat: s.lat, lon: s.lon }; return go("plan"); }
     case "to-lines": return go("lines");
     case "to-line": return S.params.fromLine ? go("lines", "line", { id: S.params.fromLine, branch: 0 }) : go("lines");
     case "to-more": return go("more");
@@ -996,7 +1180,7 @@ if ("serviceWorker" in navigator && location.protocol === "https:") navigator.se
 (async () => {
   document.documentElement.lang = lang(); applyTheme(); renderNav(); renderBadge(); setSnap(1);
   await loadNetwork(); initMap();
-  S.tab = "nearby"; render();
+  S.tab = "home"; render();
   let perm = null; try { perm = (await navigator.permissions?.query({ name: "geolocation" }))?.state; } catch {}
   if (perm === "granted") startWithLocation(true);
   else if (perm === "denied") { S.locState = "denied"; startWithLocation(false); }
