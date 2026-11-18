@@ -43,3 +43,7 @@ body{padding:0!important;overflow:hidden}
   .maplibregl-ctrl-bottom-right{bottom:0}
   .onboard{left:0}
 }
+.deprow{width:100%;background:none;border:0;border-top:1px solid var(--line);text-align:left;cursor:pointer;color:inherit;font:inherit}
+.deprow:hover{background:var(--surface-2)}
+.stop-head .lc.sm svg{width:12px;height:12px}
+.stop-head{gap:6px}
