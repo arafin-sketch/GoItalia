@@ -1,6 +1,6 @@
 // ItaliaNow service worker: makes the app installable and lets it open without a connection.
 // App files: fetched fresh when online, served from cache when offline. Live API calls are never cached here.
-const CACHE = "italianow-v8";
+const CACHE = "italianow-v9";
 const SHELL = ["./", "index.html", "app.css", "live.css", "app.js", "config.js", "data/network.json", "data/fares.json", "icon.svg", "manifest.webmanifest"];
 
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
