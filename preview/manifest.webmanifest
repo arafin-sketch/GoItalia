@@ -1,0 +1,10 @@
+{
+  "name": "ItaliaNow",
+  "short_name": "ItaliaNow",
+  "description": "Live public transport departures and journeys across Italy.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#0B6B4F",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
