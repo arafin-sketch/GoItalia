@@ -158,6 +158,7 @@ const I = {
   near: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/></svg>',
   lines: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 3v18M12 3v6a4 4 0 0 0 4 4h0a4 4 0 0 1 4 4v4"/><circle cx="5" cy="8" r="1.6" fill="currentColor"/><circle cx="5" cy="16" r="1.6" fill="currentColor"/></svg>',
   more: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+  ticket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2.5 2.5 0 0 0 0 5v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2.5 2.5 0 0 0 0-5V7z"/><path d="M14 5v14" stroke-dasharray="2 2.5"/></svg>',
   route: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.5"/></svg>',
   warn: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>',
   off: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 8.8a15 15 0 0 1 4.3-2.6M9.8 5.2A15 15 0 0 1 22 8.8M5 12.5a10 10 0 0 1 3.5-2M12.6 9.6A10 10 0 0 1 19 12.5M8.5 16a5 5 0 0 1 7 0M3 3l18 18"/></svg>',
@@ -179,7 +180,8 @@ function chip(name, color, mode, sm) {
 }
 const liveName = n => { const m = /^ME([ABC]1?)$/.exec(n || ""); return m ? m[1] : (n || ""); };
 const liveMode = m => m === "SUBWAY" ? "metro" : m;
-function titleish(n) { n = String(n || "").replace(/\s*#\s*\w+$/, "").replace(/^[A-Z' ]{3,}\s*\|\s*/, ""); const tc = n === n.toUpperCase() ? n.toLowerCase().replace(/(^|[\s(/'-])\p{L}/gu, m => m.toUpperCase()) : n; return tc.replace(/\(([A-Za-z]{2}(?:\s?-\s?[A-Za-z]{2})*)\)/g, (m, g) => "(" + g.toUpperCase() + ")"); }
+const baseName = n => norm(titleish(n)).replace(/\b(m\d|mm|fs|fn)\b/g, "").replace(/\s+/g, " ").trim();
+function titleish(n) { n = String(n || "").replace(/\s*#\s*\w+$/, "").replace(/^[A-Z' ]{3,}\s*\|\s*/, ""); const tc = n === n.toUpperCase() || n === n.toLowerCase() ? n.toLowerCase().replace(/(^|[\s(/'-])\p{L}/gu, m => m.toUpperCase()) : n; return tc.replace(/\(([A-Za-z]{2}(?:\s?-\s?[A-Za-z]{2})*)\)/g, (m, g) => "(" + g.toUpperCase() + ")"); }
 function hav(a, b) { const R = 6371000, r = Math.PI / 180; const dLa = (b[0] - a[0]) * r, dLo = (b[1] - a[1]) * r; const h = Math.sin(dLa / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dLo / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); }
 
 /* ================= API client: timeout, retry with backoff, cache, concurrency limit ================= */
@@ -312,14 +314,36 @@ function addLayers() {
   map.addLayer({ id: "j-walk", type: "line", source: "journey", filter: ["==", ["get", "walk"], true], paint: { "line-color": isDark() ? "#cfd8d3" : "#46544d", "line-width": 3.5, "line-dasharray": [0.5, 2] }, layout: { "line-cap": "round" } });
   // live vehicles (every mode), drawn above the network
   map.addSource("vehicles", { type: "geojson", data: emptyFC });
-  map.addLayer({ id: "veh", type: "circle", source: "vehicles", paint: {
-    "circle-color": ["get", "color"], "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 3.5, 14, 6.5, 17, 9],
-    "circle-stroke-color": isDark() ? "#0B0F0D" : "#FFFFFF", "circle-stroke-width": 2 } });
+  addVehicleIcons();
+  map.addLayer({ id: "veh", type: "symbol", source: "vehicles", layout: {
+    "icon-image": ["concat", "veh-", ["get", "cat"]], "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0.5, 14, 0.78, 17, 1],
+    "icon-allow-overlap": true, "icon-ignore-placement": true, "symbol-sort-key": ["match", ["get", "cat"], "train", 1, "metro", 2, "tram", 3, 4] } });
   if (map.getStyle().glyphs) map.addLayer({ id: "veh-label", type: "symbol", source: "vehicles", minzoom: 14,
-    layout: { "text-field": ["get", "name"], "text-size": 11, "text-offset": [0, -1.3], "text-allow-overlap": false, "text-font": ["Open Sans Bold", "Noto Sans Bold", "Montserrat Bold"] },
+    layout: { "text-field": ["get", "name"], "text-size": 11, "text-offset": [0, -1.7], "text-allow-overlap": false, "text-font": ["Open Sans Bold", "Noto Sans Bold", "Montserrat Bold"] },
     paint: { "text-color": isDark() ? "#E4EBE7" : "#16201B", "text-halo-color": isDark() ? "#0B0F0D" : "#FFFFFF", "text-halo-width": 1.5 } });
   applyVehicleFilter();
   applyDim();
+}
+/* map icons for live vehicles: one shape and colour per transport type, drawn in code (no image files) */
+const VEH_STYLE = { bus: ["1F6FB2", "BUS"], tram: ["E07A10", "TRAM"], metro: ["0B8F5E", "SUBWAY"], train: ["C62828", "RAIL"], ferry: ["0E7490", "FERRY"], other: ["6B4FA0", "FUNICULAR"] };
+function addVehicleIcons() {
+  for (const [cat, [col, icon]] of Object.entries(VEH_STYLE)) {
+    const id = "veh-" + cat; if (map.hasImage(id)) continue;
+    const R = 2, W = 26 * R, cv = document.createElement("canvas"); cv.width = cv.height = W; const ctx = cv.getContext("2d");
+    ctx.fillStyle = "#" + col; ctx.strokeStyle = "#FFFFFF"; ctx.lineWidth = 2.5 * R;
+    ctx.beginPath();
+    if ((cat === "train" || cat === "metro") && ctx.roundRect) ctx.roundRect(2 * R, 2 * R, 22 * R, 22 * R, (cat === "train" ? 5 : 8) * R); else ctx.arc(W / 2, W / 2, 11 * R, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    const d = (modeIcon(icon).match(/ d="([^"]+)"/) || [])[1];
+    if (d) { ctx.save(); ctx.translate(6 * R, 6 * R); ctx.scale(14 / 24 * R, 14 / 24 * R); ctx.fillStyle = "#FFFFFF"; ctx.fill(new Path2D(d)); ctx.restore(); }
+    map.addImage(id, ctx.getImageData(0, 0, W, W), { pixelRatio: R });
+  }
+}
+function renderLegend(cats) {
+  const el = $("#legend"); if (!el) return;
+  const list = ["bus", "tram", "metro", "train", "ferry", "other"].filter(c => cats.has(c));
+  el.innerHTML = list.map(c => `<span><i class="lg-${c === "train" || c === "metro" ? "sq" : "ci"}" style="background:#${VEH_STYLE[c][0]}"></i>${t(c === "other" ? "funicular" : c)}</span>`).join("");
+  el.hidden = !list.length;
 }
 function applyVehicleFilter() { if (!mapReady || !map.getLayer("veh")) return; const f = S.modeFilter === "all" ? null : ["==", ["get", "cat"], S.modeFilter]; map.setFilter("veh", f); if (map.getLayer("veh-label")) map.setFilter("veh-label", f); }
 
@@ -359,6 +383,7 @@ function drawVehicles() {
     feats.push({ type: "Feature", properties: { color: v.color, cat: v.cat, name: v.name, tripId: v.tripId || "", mode: v.mode, rawColor: v.rawColor }, geometry: { type: "Point", coordinates: [lo, la] } });
   }
   map.getSource("vehicles").setData({ type: "FeatureCollection", features: feats });
+  renderLegend(new Set(feats.filter(f => S.modeFilter === "all" || f.properties.cat === S.modeFilter).map(f => f.properties.cat)));
   updateVehCount();
 }
 function startVehicles() {
@@ -456,7 +481,7 @@ function renderStrike() {
   $("#strikeSlot").innerHTML = html;
 }
 function renderNav() {
-  const tabs = [["home", I.route, "home_tab"], ["nearby", I.loc, "stations"], ["lines", I.lines, "lines"], ["more", I.more, "more"]];
+  const tabs = [["home", I.route, "home_tab"], ["nearby", I.loc, "stations"], ["lines", I.lines, "lines"], ["tickets", I.ticket, "tickets"], ["more", I.more, "more"]];
   const cur = S.tab === "plan" ? "home" : S.tab;
   $("#nav").innerHTML = tabs.map(([k, ic, l]) => `<button data-tab="${k}" ${cur === k ? 'aria-current="page"' : ""}><i>${ic}</i>${t(l)}</button>`).join("");
 }
@@ -519,8 +544,7 @@ async function loadNearby(center = S.nearby.center || S.me || CFG.DEFAULT_CENTER
     // nearest stops first, but always keep the nearest stop of every transport type (bus, metro, tram, train, ferry)
     const sorted = [...groups.values()].sort((a, b) => a.distance - b.distance);
     const picked = [];
-    for (const c of CATS.slice(1)) { const s = sorted.find(x => (x.modes || []).some(m => modeCat(m) === c)); if (s && !picked.includes(s)) picked.push(s); }
-    for (const s of sorted) { if (picked.length >= 12) break; if (!picked.includes(s)) picked.push(s); }
+    for (const s of sorted) { if (picked.length >= 10) break; if (!picked.includes(s)) picked.push(s); }
     picked.sort((a, b) => a.distance - b.distance);
     const results = await Promise.all(picked.map(async s => {
       try { const r = await api.get("/api/v1/stoptimes", { stopId: s.parentId || s.stopId, n: 14 }, { ttl: CFG.CACHE_SECONDS }); for (const x of r.stopTimes || []) noteAlerts(x.place?.alerts, liveName(x.displayName || x.routeShortName)); return { ...s, times: r.stopTimes || [] }; }
@@ -530,7 +554,8 @@ async function loadNearby(center = S.nearby.center || S.me || CFG.DEFAULT_CENTER
     if (results.length && results.every(r => r.times === null)) throw new Error("all failed");
     for (let a = 0; a < results.length; a++) for (let b = results.length - 1; b > a; b--) {
       const A = results[a], B = results[b];
-      if (norm(titleish(A.name)) === norm(titleish(B.name)) && hav([A.lat, A.lon], [B.lat, B.lon]) < 300) {
+      if (baseName(A.name) === baseName(B.name) && hav([A.lat, A.lon], [B.lat, B.lon]) < 300) {
+        if (baseName(A.name).length && /\b[mM]\d\b/.test(A.name)) A.name = titleish(A.name).replace(/(\s+M\d)+$/i, "");
         const seen = new Set((A.times || []).map(x => x.tripId + x.place.departure));
         A.times = [...(A.times || []), ...(B.times || []).filter(x => !seen.has(x.tripId + x.place.departure))].sort((x, y) => new Date(x.place.departure || x.place.arrival) - new Date(y.place.departure || y.place.arrival));
         A.modes = [...new Set([...(A.modes || []), ...(B.modes || [])])]; results.splice(b, 1);
@@ -625,7 +650,7 @@ function nearbyState(n, R) { // loading / error / empty, or "" when there are st
 }
 function stopMarkers(list) {
   list.forEach(s => { const m = (s.modes || [])[0]; if (S.modeFilter !== "all" && !(s.modes || []).some(x => modeCat(x) === S.modeFilter)) return;
-    const mk = addMarker(s.lat, s.lon, "mk-stop", modeIcon(m), () => { stopSrc = [s]; go(S.tab === "home" ? "home" : "nearby", "stop", { s }); }, titleish(s.name)); mk.style.background = "#" + CAT_COLOR[modeCat(m)]; });
+    const mk = addMarker(s.lat, s.lon, "mk-stop", modeIcon(m), () => { stopSrc = [s]; go(S.tab === "home" ? "home" : "nearby", "stop", { s }); }, titleish(s.name)); mk.style.color = mk.style.borderColor = "#" + CAT_COLOR[modeCat(m)]; });
 }
 /* HOME: one clear search, four shortcuts, and the next departures around you */
 function greeting() { const h = romeParts(new Date()).h; return t(h < 5 ? "good_night" : h < 12 ? "good_morning" : h < 18 ? "good_afternoon" : "good_evening"); }
@@ -637,35 +662,38 @@ function nearbyDepartures(n, max = 6) {
   for (const r of rows) { const k = (r.g[0].displayName || r.g[0].routeShortName) + "|" + r.g[0].headsign; if (seen.has(k)) continue; seen.add(k); out.push(r); if (out.length >= max) break; }
   return out;
 }
-function homeRow({ s, g }) {
+function homeRow({ s, g, compact }) {
   const x = g[0]; const p = x.place || {}; const later = g.slice(1).map(y => minutesUntil(y.place.departure || y.place.arrival)).filter(m => m < 60).slice(0, 2).map(m => nf(Math.max(0, m)));
   const walk = Math.max(1, Math.round(s.distance * 1.3 / 80));
   return `<button class="hrow ${p.cancelled ? "cancelled" : ""}" data-trip="${tripRef(x)}">${chip(liveName(x.displayName || x.routeShortName || x.tripShortName), liveColor(x.routeColor, x.mode), liveMode(x.mode))}
-    <span class="hmid"><b>${esc(titleish(x.headsign || ""))}</b><small>${esc(titleish(s.name))} · ${t("walk_min", { m: nf(walk) })}${later.length ? ` · ${t("then")} ${later.join(", ")}′` : ""}</small></span>${depTimeHtml(x)}</button>`;
+    <span class="hmid"><b>${esc(titleish(x.headsign || ""))}</b><small>${compact ? esc(x.agencyName || "") + (p.track ? ` · ${t("platform")} ${esc(p.track)}` : "") : `${esc(titleish(s.name))} · ${t("walk_min", { m: nf(walk) })}`}${later.length ? ` · ${t("then")} ${later.join(", ")}′` : ""}</small></span>${depTimeHtml(x)}</button>`;
 }
 function renderHome(el) {
   if (S.view === "stop") return renderStop(el);
   if (S.view === "trip") return renderTrip(el);
   stopSrc = []; S.tripRefs = [];
   const n = S.nearby;
-  const c = cityAt(...(n.center || S.me || CFG.DEFAULT_CENTER)); const F = c && FARES?.cities[c];
-  const minFare = F && F.tickets.length ? Math.min(...F.tickets.map(x => x.price)) : null;
   const q = (act, icon, label, sub) => `<button class="qbtn" data-act="${act}"><span class="qi">${icon}</span><span class="ql">${label}</span>${sub ? `<small>${sub}</small>` : ""}</button>`;
   let html = `<p class="hello">${greeting()}</p>
     <button class="whereto big" data-act="where-to">${I.search}<span>${t("where_to")}</span></button>
-    <div class="quick">
+    <div class="quick three">
       ${q(S.home ? "go-home" : "hint-home", I.home, t("home"), S.home ? "" : t("set"))}
       ${q(S.work ? "go-work" : "hint-home", I.work, t("work"), S.work ? "" : t("set"))}
-      ${q("open-tickets", '<b class="euro">€</b>', t("tickets"), minFare != null ? t("from_price", { p: eur(minFare) }) : "")}
       ${q("open-alerts", I.warn, t("alerts"), S.alerts.size ? nf(S.alerts.size) : "")}
     </div>
-    <div class="sec-head"><h2>${t("departing")}</h2><span class="livepill ${n.loading ? "busy" : ""}" id="refreshLine">${n.updated ? `${liveIcon} ${fmtTime(new Date(n.updated))}` : ""}</span></div>
+    <div class="sec-head"><h2>${t("nearest")}</h2><span class="livepill ${n.loading ? "busy" : ""}" id="refreshLine">${n.updated ? `${liveIcon} ${fmtTime(new Date(n.updated))}` : ""}</span></div>
     ${nearbyStatus()}`;
   const state = nearbyState(n, CFG.NEARBY_RADIUS_M);
   if (state) html += state;
   else {
-    const rows = nearbyDepartures(n);
-    html += rows.length ? `<div class="hlist">${rows.map(homeRow).join("")}</div>` : `<div class="empty">${t("no_service")}</div>`;
+    // the closest stops, nearest first, each with its next departures
+    const near = n.stops.filter(s => s.times && depGroups(s.times).length).slice(0, 3);
+    html += near.length ? near.map(s => {
+      const i = stopSrc.push(s) - 1; const cat = modeCat((s.modes || [])[0]); const walk = Math.max(1, Math.round(s.distance * 1.3 / 80));
+      const groups = depGroups(s.times).filter(g => norm(titleish(g[0].headsign || "")) !== norm(titleish(s.name))).slice(0, 4);
+      return `<div class="nstop"><button class="nhead" data-act="open-stop" data-i="${i}"><span class="sq" style="background:#${CAT_COLOR[cat]}">${modeIcon(CAT_ICON[cat])}</span><span class="hmid"><b>${esc(titleish(s.name))}</b><small>${[t("walk_min", { m: nf(walk) }), fmtDist(s.distance), s.stopCode ? t("stop_code", { c: esc(s.stopCode) }) : ""].filter(Boolean).join(" · ")}</small></span>${I.chev}</button>
+        ${groups.map(g => homeRow({ s, g, compact: true })).join("")}</div>`;
+    }).join("") : `<div class="empty">${t("no_service")}</div>`;
     html += `<button class="btn tonal seeall" data-tab="nearby">${t("see_all_stops")} ${I.chev}</button>`;
   }
   el.innerHTML = html;
@@ -757,6 +785,7 @@ function nearbyOffline(c) {
 }
 
 /* ================= fares ================= */
+const myCity = () => S.me ? cityAt(S.me[0], S.me[1]) : null; // the city you are in, when location is on
 function cityAt(lat, lon) { if (!NET) return null; let best = null, bd = 30000; for (const c of NET.cities) { const d = hav([lat, lon], c.center); if (d < bd) { bd = d; best = c.id; } } return best; }
 const tName = tk => (lang() === "it" ? tk.it : tk.en);
 /* estimated fare of a live itinerary: urban tickets only, never guessed for trains or other operators */
@@ -788,10 +817,10 @@ function renderAlerts(el) {
 }
 function renderTickets(el) {
   const cities = ["rome", "milan", "naples", "turin", "genoa", "catania"];
-  const city = S.params.city || cityAt(...(S.me || CFG.DEFAULT_CENTER)) || "rome"; const F = FARES?.cities[city];
+  const mine = myCity(); const city = S.params.city || mine || cityAt(...(S.nearby.center || CFG.DEFAULT_CENTER)) || "rome"; const F = FARES?.cities[city];
   const checked = FARES ? new Intl.DateTimeFormat(locale(), { dateStyle: "long", timeZone: "UTC" }).format(new Date(FARES.checked)) : "";
-  el.innerHTML = `${backBtn(S.params.back || "to-more")}<h2 class="title">${t("ticket_prices")}</h2>
-    <div class="chips" role="group">${cities.map(c => `<button class="chip" data-tcity="${c}" aria-pressed="${c === city}">${esc(cityById[c]?.name || c)}</button>`).join("")}</div>
+  el.innerHTML = `${S.tab === "tickets" ? "" : backBtn(S.params.back || "to-more")}<h2 class="title">${mine ? t("tickets_in", { c: esc(cityById[city]?.name || "") }) : t("ticket_prices")}</h2>
+    ${mine ? "" : `<div class="chips" role="group">${cities.map(c => `<button class="chip" data-tcity="${c}" aria-pressed="${c === city}">${esc(cityById[c]?.name || c)}</button>`).join("")}</div>`}
     ${!F ? `<div class="skel"></div>` : F.tickets.length ? `<div class="list" style="margin-top:8px">${F.tickets.map(tk => `<div class="ticket"><div><b>${esc(tName(tk))}</b>${tk.minutes ? `<small>${t("valid_min", { m: tk.minutes })}</small>` : ""}${tk[lang() + "_note"] ? `<small>${esc(tk[lang() + "_note"])}</small>` : ""}</div><span class="price tnum">${eur(tk.price)}</span></div>`).join("")}</div>`
       : `<div class="alert" style="margin-top:8px">${I.warn}<span>${t("no_prices")}</span></div>`}
     ${F ? `<p class="small muted" style="margin:14px 0 8px">${esc(t("prices_checked", { o: F.operator, d: F.checked ? new Intl.DateTimeFormat(locale(), { dateStyle: "long", timeZone: "UTC" }).format(new Date(F.checked)) : checked }))} ${t("prices_auto")}</p><a class="btn tonal" href="${esc(F.source)}" target="_blank" rel="noopener">${t("official_site")} ${I.ext.replace("<svg", '<svg width="16" height="16"')}</a>` : ""}`;
@@ -980,13 +1009,14 @@ function renderLines(el) {
   if (S.view === "lx") return renderLineX(el);
   if (S.view === "line") return renderNetLine(el);
   if (S.view === "station") return renderStation(el);
+  if (myCity() && LINE_CITIES.includes(myCity())) S.linesCity = myCity();
   if (!S.linesCity || !LINE_CITIES.includes(S.linesCity)) S.linesCity = nearestCity();
   const city = S.linesCity, idx = LIDX[city];
   if (S.lineTab === "alerts") S.lineTab = "all";
   const tabs = [["all", t("all")], ["bus", t("bus")], ["metro", t("metro")], ["tram", t("tram")], ["train", t("train")], ["other", t("funicular")], ["ferry", t("ferry")], ["fav", "★ " + t("favourites")]]
     .filter(([k]) => !idx || ["fav", "all"].includes(k) || idx.routes.some(r => r.cat === k));
   el.innerHTML = `<label class="lsearch">${I.search}<input id="lineQ" type="search" autocomplete="off" placeholder="${t("search_line")}" aria-label="${t("search_line")}" value="${esc(S.lineQ)}"></label>
-    <div class="chips" role="group" aria-label="${t("city")}">${LINE_CITIES.map(c => `<button class="chip" data-city="${c}" aria-pressed="${c === city}">${esc(cityById[c]?.name || c)}</button>`).join("")}</div>
+    ${myCity() ? `<p class="cityline">${I.loc.replace("<svg", '<svg width="16" height="16"')}${esc(cityById[city]?.name || "")} · ${esc(idx?.operator || cityById[city]?.operator || "")}</p>` : `<div class="chips" role="group" aria-label="${t("city")}">${LINE_CITIES.map(c => `<button class="chip" data-city="${c}" aria-pressed="${c === city}">${esc(cityById[c]?.name || c)}</button>`).join("")}</div>`}
     <div class="tabs2 scroll" role="tablist">${tabs.map(([k, l]) => `<button role="tab" data-ltab="${k}" aria-selected="${S.lineTab === k}">${l}</button>`).join("")}</div>
     <div id="lineList">${idx ? "" : `<div class="snap">${t("loading_lines")}</div><div class="skel"></div>`}</div>`;
   clearMarkers(); showMe(); setFocus(emptyFC);
@@ -1112,7 +1142,6 @@ function renderMore(el) {
     <label class="set"><span class="t"><b>${t("crash")}</b><small>${t("crash_s")}</small></span><span class="switch"><input type="checkbox" id="crashSw" ${S.crash ? "checked" : ""}><span></span></span></label>
     <label class="set"><span class="t"><b>${t("sim_off")}</b><small>${t("sim_off_s")}</small></span><span class="switch"><input type="checkbox" id="offSw" ${S.simOffline ? "checked" : ""}><span></span></span></label>
     <a class="linkrow" href="https://scioperi.mit.gov.it/mit2/public/scioperi" target="_blank" rel="noopener">${I.warn}<span style="flex:1"><b>${t("strikes")}</b><br><span class="muted small">scioperi.mit.gov.it</span></span>${I.ext}</a>
-    <button class="linkrow" data-act="open-tickets"><span style="flex:1"><b>${t("ticket_prices")}</b></span>${I.chev}</button>
     <button class="linkrow" data-act="open-alerts"><span style="flex:1"><b>${t("service_alerts")}</b>${S.alerts.size ? ` <span class="muted small">(${nf(S.alerts.size)})</span>` : ""}</span>${I.chev}</button>
     <h3 class="sub">${t("saved_places")}</h3>
     ${[["home", I.home], ["work", I.work]].map(([k, ic]) => `<div class="set"><span style="width:40px;height:40px;border-radius:50%;background:var(--brand-soft);color:var(--on-brand-soft);display:grid;place-items:center;flex:none">${ic.replace("<svg", '<svg width="20" height="20"')}</span><span class="t"><b>${t(k)}</b><small>${S[k] ? esc(S[k].name) : t("set_hint")}</small></span>${S[k] ? `<button class="btn text" data-act="rm-${k}">${t("remove")}</button>` : ""}</div>`).join("")}
@@ -1155,7 +1184,7 @@ function render() {
   if (!(S.tab === "plan" && (S.view === "results" || S.view === "detail"))) setJourney(emptyFC);
   if (!(S.tab === "lines" && S.view)) setFocus(emptyFC);
   if (!(S.tab === "lines" && S.view === "lx") && S.lineFocus) { S.lineFocus = null; drawVehicles(); }
-  const v = S.view === "trip" ? renderTrip : S.view === "stop" ? renderStop : { home: renderHome, nearby: renderNearby, plan: renderPlan, lines: renderLines, more: renderMore }[S.tab];
+  const v = S.view === "trip" ? renderTrip : S.view === "stop" ? renderStop : { tickets: renderTickets, home: renderHome, nearby: renderNearby, plan: renderPlan, lines: renderLines, more: renderMore }[S.tab];
   body.innerHTML = ""; const el = document.createElement("div"); el.className = "fade-in"; body.appendChild(el); v(el);
 }
 let toastT;
@@ -1205,7 +1234,7 @@ app.addEventListener("click", async e => {
       else { S.favStops = [...S.favStops, { id, name: titleish(st.name), lat: st.lat, lon: st.lon, modes: st.modes || [], stopCode: st.stopCode || "" }]; S.favData[id] = st.times || undefined; }
       store.set("favStops", S.favStops); return render(); }
     case "fav-line": { const { city, i } = S.params; const k = lineKey(city, LIDX[city].routes[i]); S.favLines = S.favLines.includes(k) ? S.favLines.filter(x => x !== k) : [...S.favLines, k]; store.set("favLines", S.favLines); return render(); }
-    case "open-tickets": return go("more", "tickets", { back: S.tab === "home" ? "to-home" : "to-more" });
+    case "open-tickets": return go("tickets");
     case "to-home": return go("home");
     case "open-alerts": return go("more", "alerts", { back: S.tab === "home" ? "to-home" : "to-more" });
     case "clear-recent-lines": S.recentLines = S.recentLines.filter(k => !k.startsWith(S.linesCity + "|")); store.set("recentLines", S.recentLines); return fillLineList();
