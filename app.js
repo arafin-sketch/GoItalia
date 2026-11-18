@@ -13,6 +13,7 @@ const store = {
 /* ================= i18n ================= */
 const STR = {
  en: {
+  tickets: "Tickets", ticket_prices: "Ticket prices", tickets_in: "Tickets in {c}", from_price: "from {p}", valid_min: "Valid {m} min", fare_other: "Train or regional fare: check with the operator", fare_n: "{n} × {t}", prices_checked: "Official prices from {o}, checked {d}.", official_site: "Official website", no_prices: "We couldn't verify prices for this city yet. See the operator's website.", paper: "{p} on paper",
   home_tab: "Home", stations: "Stations", nearest: "Nearest stops", favourites: "Favourites", stop_code: "Stop {c}", walk_min: "{m} min walk", all_deps: "All departures", scheduled: "Scheduled", search_line: "Search for a line", alerts: "Alerts", recent_lines: "Recent", clear: "Clear", no_alerts: "No service alerts reported right now.", no_fav_stops: "No favourite stops yet. Tap the star on a stop to add it.", no_fav_lines: "No favourite lines yet. Tap the star on a line to add it.", show_more: "Show more", direction: "Direction", tap_stop: "Tap a stop to see when this line arrives there.", vehicles_now: n => n === 1 ? "1 vehicle on the line now" : `${n} vehicles on the line now`, no_lines: "No lines match your search.", loading_lines: "Loading lines…", n_alerts: n => n === 1 ? "1 service alert" : `${n} service alerts`, add_fav: "Add to favourites", remove_fav: "Remove from favourites", lines_at: "Lines", no_live_here: "No departures of this line in the next hour.", city: "City",
   plan: "Directions", nearby: "Nearby", where_to: "Where to?", set_home: "Set home", set_work: "Set work", save_place: "Save this destination", saved_places: "Saved places", remove: "Remove", share: "Share", copied: "Copied", install: "Install app", install_s: "Add ItaliaNow to your home screen.", sort_by: "Sort", set_hint: "Search for a place, then save it as Home or Work from the results.", lines: "Lines", saved: "Saved", more: "More",
   from: "From", to: "To", choose_start: "Choose start", choose_dest: "Choose destination", swap: "Swap start and destination",
@@ -51,6 +52,7 @@ const STR = {
   about: "About", lines_title: "Lines", stop_dep: "Departures", geo_err: "Search is unavailable right now. Showing stations from the built-in network.",
  },
  it: {
+  tickets: "Biglietti", ticket_prices: "Prezzi dei biglietti", tickets_in: "Biglietti a {c}", from_price: "da {p}", valid_min: "Valido {m} min", fare_other: "Tariffa treno o regionale: verifica con l'operatore", fare_n: "{n} × {t}", prices_checked: "Prezzi ufficiali di {o}, verificati il {d}.", official_site: "Sito ufficiale", no_prices: "Non abbiamo ancora potuto verificare i prezzi per questa città. Consulta il sito dell'operatore.", paper: "{p} su carta",
   home_tab: "Home", stations: "Fermate", nearest: "Fermate più vicine", favourites: "Preferiti", stop_code: "Fermata {c}", walk_min: "{m} min a piedi", all_deps: "Tutte le partenze", scheduled: "Programmato", search_line: "Cerca una linea", alerts: "Avvisi", recent_lines: "Recenti", clear: "Cancella", no_alerts: "Nessun avviso di servizio al momento.", no_fav_stops: "Nessuna fermata preferita. Tocca la stella su una fermata per aggiungerla.", no_fav_lines: "Nessuna linea preferita. Tocca la stella su una linea per aggiungerla.", show_more: "Mostra altre", direction: "Direzione", tap_stop: "Tocca una fermata per vedere quando passa questa linea.", vehicles_now: n => n === 1 ? "1 mezzo in linea ora" : `${n} mezzi in linea ora`, no_lines: "Nessuna linea corrisponde alla ricerca.", loading_lines: "Caricamento linee…", n_alerts: n => n === 1 ? "1 avviso di servizio" : `${n} avvisi di servizio`, add_fav: "Aggiungi ai preferiti", remove_fav: "Rimuovi dai preferiti", lines_at: "Linee", no_live_here: "Nessun passaggio di questa linea nella prossima ora.", city: "Città",
   plan: "Percorso", nearby: "Vicino", where_to: "Dove vuoi andare?", set_home: "Imposta casa", set_work: "Imposta lavoro", save_place: "Salva questa destinazione", saved_places: "Luoghi salvati", remove: "Rimuovi", share: "Condividi", copied: "Copiato", install: "Installa app", install_s: "Aggiungi ItaliaNow alla schermata Home.", sort_by: "Ordina", set_hint: "Cerca un luogo, poi salvalo come Casa o Lavoro dai risultati.", lines: "Linee", saved: "Salvati", more: "Altro",
   from: "Da", to: "A", choose_start: "Scegli partenza", choose_dest: "Scegli destinazione", swap: "Inverti partenza e destinazione",
@@ -215,7 +217,10 @@ let NET = null, lineById = {}, cityById = {}, stations = {}, transfersAt = {}, r
 const cityOf = sid => sid.split(":")[0];
 const lineName = l => l.code;
 const lineTermini = l => { const b = l.branches[0]; return `${stations[b[0]].name} – ${stations[b[b.length - 1]].name}`; };
+let FARES = null;
+const eur = v => new Intl.NumberFormat(locale(), { style: "currency", currency: "EUR" }).format(v);
 async function loadNetwork() {
+  fetch("data/fares.json").then(r => r.json()).then(f => { FARES = f; if (S.tab === "home" && !S.view) render(); }).catch(() => {});
   NET = await (await fetch("data/network.json")).json();
   lineById = Object.fromEntries(NET.lines.map(l => [l.id, l])); cityById = Object.fromEntries(NET.cities.map(c => [c.id, c])); stations = NET.stations;
   for (const [a, b, d, w] of NET.transfers) { (transfersAt[a] ||= []).push({ to: b, d, w }); (transfersAt[b] ||= []).push({ to: a, d, w }); }
@@ -637,6 +642,8 @@ function renderHome(el) {
     html += `<div class="carousel" id="carousel">${top.map(s => `<div class="slide">${stopCard(s, 3)}</div>`).join("")}</div>
       <div class="dots" aria-hidden="true">${top.map((_, k) => `<i class="${k === 0 ? "on" : ""}"></i>`).join("")}</div>`;
   }
+  { const c = cityAt(...(S.nearby.center || S.me || CFG.DEFAULT_CENTER)); const F = c && FARES?.cities[c];
+    if (F) { const min = F.tickets.length ? Math.min(...F.tickets.map(x => x.price)) : null; html += `<button class="card ticketcard" data-act="open-tickets"><span class="tk-ic">€</span><span><b>${t("tickets_in", { c: esc(cityById[c].name) })}</b><small>${min != null ? t("from_price", { p: eur(min) }) : esc(F.operator)}</small></span>${I.chev}</button>`; } }
   if (S.alerts.size) html += `<button class="card alertcard" data-act="open-alerts">${I.warn}<span><b>${t("n_alerts", S.alerts.size)}</b><small>${esc([...S.alerts.values()][0].h)}</small></span>${I.chev}</button>`;
   el.innerHTML = html;
   const car = $("#carousel");
@@ -725,6 +732,40 @@ function nearbyOffline(c) {
   if (!near.length) return "";
   const p = romeParts(new Date()); const sec = p.h * 3600 + p.mi * 60;
   return `<h3 class="sub">${t("offline")}</h3><div class="list">${near.map(({ st, d }) => `<div class="stop-card"><div class="stop-head"><b>${esc(st.name)}</b><span class="muted small">${fmtDist(d)}</span></div>${st.lines.map(id => { const L = lineById[id], hw = headwayAt(L, sec); return `<div class="dep">${chip(lineName(L), L.color, L.mode)}<div class="hd">${esc(lineTermini(L))}<small>${t("est")}</small></div><div class="tm small">${hw ? t("every", { m: nf(Math.round(hw)) }) : t("no_service")}</div></div>`; }).join("")}</div>`).join("")}</div>`;
+}
+
+/* ================= fares ================= */
+function cityAt(lat, lon) { if (!NET) return null; let best = null, bd = 30000; for (const c of NET.cities) { const d = hav([lat, lon], c.center); if (d < bd) { bd = d; best = c.id; } } return best; }
+const tName = tk => (lang() === "it" ? tk.it : tk.en);
+/* estimated fare of a live itinerary: urban tickets only, never guessed for trains or other operators */
+function fareFor(it) {
+  if (!FARES) return null;
+  const legs = it.legs.filter(l => l.mode !== "WALK"); if (!legs.length) return null;
+  const city = cityAt(legs[0].from.lat, legs[0].from.lon); const F = city && FARES.cities[city];
+  if (!F || !F.single) return { other: true };
+  const re = new RegExp(F.agencies, "i");
+  if (!legs.every(l => re.test(l.agencyName || ""))) return { other: true };
+  let tk = F.tickets.find(x => x.id === F.single);
+  if (city === "catania" && legs.some(l => /amts/i.test(l.agencyName || ""))) tk = F.tickets.find(x => x.id === "mb120");
+  const mins = (new Date(legs[legs.length - 1].endTime) - new Date(legs[0].startTime)) / 60000;
+  const n = tk.minutes ? Math.max(1, Math.ceil(mins / tk.minutes)) : legs.length;
+  return { price: n * tk.price, n, tk };
+}
+function fareBadge(it) {
+  const f = fareFor(it); if (!f) return "";
+  if (f.other) return `<span class="fare other">${t("fare_other")}</span>`;
+  return `<span class="fare">${eur(f.price)} <small>${t("fare_n", { n: f.n, t: esc(tName(f.tk)) })}</small></span>`;
+}
+function renderTickets(el) {
+  const cities = ["rome", "milan", "naples", "turin", "genoa", "catania"];
+  const city = S.params.city || cityAt(...(S.me || CFG.DEFAULT_CENTER)) || "rome"; const F = FARES?.cities[city];
+  const checked = FARES ? new Intl.DateTimeFormat(locale(), { dateStyle: "long", timeZone: "UTC" }).format(new Date(FARES.checked)) : "";
+  el.innerHTML = `${backBtn(S.params.back || "to-more")}<h2 class="title">${t("ticket_prices")}</h2>
+    <div class="chips" role="group">${cities.map(c => `<button class="chip" data-tcity="${c}" aria-pressed="${c === city}">${esc(cityById[c]?.name || c)}</button>`).join("")}</div>
+    ${!F ? `<div class="skel"></div>` : F.tickets.length ? `<div class="list" style="margin-top:8px">${F.tickets.map(tk => `<div class="ticket"><div><b>${esc(tName(tk))}</b>${tk.minutes ? `<small>${t("valid_min", { m: tk.minutes })}</small>` : ""}${tk[lang() + "_note"] ? `<small>${esc(tk[lang() + "_note"])}</small>` : ""}</div><span class="price tnum">${eur(tk.price)}</span></div>`).join("")}</div>`
+      : `<div class="alert" style="margin-top:8px">${I.warn}<span>${t("no_prices")}</span></div>`}
+    ${F ? `<p class="small muted" style="margin:14px 0 8px">${esc(t("prices_checked", { o: F.operator, d: checked }))}</p><a class="btn tonal" href="${esc(F.source)}" target="_blank" rel="noopener">${t("official_site")} ${I.ext.replace("<svg", '<svg width="16" height="16"')}</a>` : ""}`;
+  clearMarkers(); showMe();
 }
 
 /* ================= plan (live, offline fallback) ================= */
@@ -836,7 +877,7 @@ function renderResults(el) {
       const tr = it.legs.filter(l => l.mode !== "WALK"); const firstT = tr[0]; const delay = tr.map(l => delayBadge(l.scheduledStartTime, l.startTime, l.realTime, l.cancelled)).find(Boolean) || "";
       const walk = it.legs.filter(l => l.mode === "WALK").reduce((a, l) => a + (l.distance || 0), 0);
       return `<button class="card" data-act="detail" data-i="${i}"><div class="res-top"><span class="res-time tnum">${fmtTime(new Date(it.startTime))} – ${fmtTime(new Date(it.endTime))}</span><span class="res-dur tnum">${fmtDur(it.duration)}</span></div>
-        <div class="res-legs">${legChips(it.legs)}</div><div class="res-meta"><span>${t("changes", it.transfers)}</span>${walk ? `<span>· ${t("total_walk", { d: fmtDist(walk) })}</span>` : ""}${firstT ? `<span>· ${t("depart")} ${esc(titleish(firstT.from.name))}${firstT.from.track ? ` · ${t("platform")} ${esc(firstT.from.track)}` : ""}</span>` : ""}${delay}</div></button>`;
+        <div class="res-legs">${legChips(it.legs)}</div><div class="res-meta"><span>${t("changes", it.transfers)}</span>${walk ? `<span>· ${t("total_walk", { d: fmtDist(walk) })}</span>` : ""}${firstT ? `<span>· ${t("depart")} ${esc(titleish(firstT.from.name))}${firstT.from.track ? ` · ${t("platform")} ${esc(firstT.from.track)}` : ""}</span>` : ""}${delay}</div>${fareBadge(it) ? `<div class="res-fare">${fareBadge(it)}</div>` : ""}</button>`;
     }).join("")}</div>`;
     if (R.its[0]) { const { fc, pts } = liveJourneyFC(R.its[0]); setJourney(fc); fit(pts); }
   } else {
@@ -854,7 +895,7 @@ function renderDetail(el) {
   endMarkers();
   if (R.live) {
     const it = R.its[i];
-    html += `<div class="res-top"><span class="res-time tnum">${fmtTime(new Date(it.startTime))} – ${fmtTime(new Date(it.endTime))}</span><span class="res-dur tnum">${fmtDur(it.duration)}</span></div><div class="res-meta" style="margin-bottom:12px">${t("changes", it.transfers)}</div>`;
+    html += `<div class="res-top"><span class="res-time tnum">${fmtTime(new Date(it.startTime))} – ${fmtTime(new Date(it.endTime))}</span><span class="res-dur tnum">${fmtDur(it.duration)}</span></div><div class="res-meta" style="margin-bottom:12px">${t("changes", it.transfers)} ${fareBadge(it)}</div>`;
     it.legs.forEach((l, k) => {
       const walk = l.mode === "WALK"; const st = new Date(l.startTime), sst = new Date(l.scheduledStartTime || l.startTime); const shifted = l.realTime && Math.abs(st - sst) >= 60000;
       const fromName = k === 0 ? S.from.name : titleish(l.from.name);
@@ -1036,6 +1077,7 @@ function renderSaved(el) {
   clearMarkers(); showMe();
 }
 function renderMore(el) {
+  if (S.view === "tickets") return renderTickets(el);
   if (S.view === "privacy") return renderPrivacy(el); if (S.view === "attr") return renderAttr(el);
   const opt = (name, cur, list) => `<div class="seg" role="group" aria-label="${t(name)}" style="flex:none">${list.map(([v, l]) => `<button data-set="${name}" data-v="${v}" aria-pressed="${cur === v}">${l}</button>`).join("")}</div>`;
   el.innerHTML = `<h2 class="title">${t("settings")}</h2>
@@ -1044,6 +1086,7 @@ function renderMore(el) {
     <label class="set"><span class="t"><b>${t("crash")}</b><small>${t("crash_s")}</small></span><span class="switch"><input type="checkbox" id="crashSw" ${S.crash ? "checked" : ""}><span></span></span></label>
     <label class="set"><span class="t"><b>${t("sim_off")}</b><small>${t("sim_off_s")}</small></span><span class="switch"><input type="checkbox" id="offSw" ${S.simOffline ? "checked" : ""}><span></span></span></label>
     <a class="linkrow" href="https://scioperi.mit.gov.it/mit2/public/scioperi" target="_blank" rel="noopener">${I.warn}<span style="flex:1"><b>${t("strikes")}</b><br><span class="muted small">scioperi.mit.gov.it</span></span>${I.ext}</a>
+    <button class="linkrow" data-act="open-tickets"><span style="flex:1"><b>${t("ticket_prices")}</b></span>${I.chev}</button>
     <h3 class="sub">${t("saved_places")}</h3>
     ${[["home", I.home], ["work", I.work]].map(([k, ic]) => `<div class="set"><span style="width:40px;height:40px;border-radius:50%;background:var(--brand-soft);color:var(--on-brand-soft);display:grid;place-items:center;flex:none">${ic.replace("<svg", '<svg width="20" height="20"')}</span><span class="t"><b>${t(k)}</b><small>${S[k] ? esc(S[k].name) : t("set_hint")}</small></span>${S[k] ? `<button class="btn text" data-act="rm-${k}">${t("remove")}</button>` : ""}</div>`).join("")}
     ${installEvt ? `<button class="linkrow" data-act="install"><span style="flex:1"><b>${t("install")}</b><br><span class="muted small">${t("install_s")}</span></span>${I.chev}</button>` : ""}
@@ -1098,6 +1141,7 @@ app.addEventListener("click", async e => {
   if (d.trip) { const ref = S.tripRefs[+d.trip]; if (!ref?.tripId) return; S.prev = { tab: S.tab, view: S.view, params: S.params }; return go(S.tab, "trip", { ref, back: "trip-back" }); }
   if (d.city) { S.linesCity = d.city; S.lineQ = ""; S.linesShown = 60; return render(); }
   if (d.st) { S.stationsTab = d.st; return render(); }
+  if (d.tcity) { S.params.city = d.tcity; return render(); }
   if (d.ltab) { S.lineTab = d.ltab; S.linesShown = 60; [...document.querySelectorAll("[data-ltab]")].forEach(x => x.setAttribute("aria-selected", x === b)); return fillLineList(); }
   if (d.lr) { const [city, i] = d.lr.split("|"); const r = LIDX[city]?.routes[+i]; if (!r) return; const k = lineKey(city, r); S.recentLines = [k, ...S.recentLines.filter(x => x !== k)].slice(0, 12); store.set("recentLines", S.recentLines); S.tripRefs = []; return go("lines", "lx", { city, i: +i, dir: 0 }); }
   if (d.dir) { S.params.dir = +d.dir; return render(); }
@@ -1134,6 +1178,8 @@ app.addEventListener("click", async e => {
       else { S.favStops = [...S.favStops, { id, name: titleish(st.name), lat: st.lat, lon: st.lon, modes: st.modes || [], stopCode: st.stopCode || "" }]; S.favData[id] = st.times || undefined; }
       store.set("favStops", S.favStops); return render(); }
     case "fav-line": { const { city, i } = S.params; const k = lineKey(city, LIDX[city].routes[i]); S.favLines = S.favLines.includes(k) ? S.favLines.filter(x => x !== k) : [...S.favLines, k]; store.set("favLines", S.favLines); return render(); }
+    case "open-tickets": return go("more", "tickets", { back: S.tab === "home" ? "to-home" : "to-more" });
+    case "to-home": return go("home");
     case "open-alerts": S.lineTab = "alerts"; return go("lines");
     case "clear-recent-lines": S.recentLines = S.recentLines.filter(k => !k.startsWith(S.linesCity + "|")); store.set("recentLines", S.recentLines); return fillLineList();
     case "more-lines": S.linesShown += 100; return fillLineList();
