@@ -121,3 +121,34 @@ body{padding:0!important;overflow:hidden}
 .fare small{font-weight:600;color:var(--fg-3);font-size:12px}
 .fare.other{font-weight:600;color:var(--fg-3);font-size:12px}
 a.btn{text-decoration:none}
+/* home v3: calm and simple */
+.hello{font-family:var(--font-display);font-weight:800;font-size:24px;letter-spacing:-.02em;margin:2px 0 12px;color:var(--fg)}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0 6px}
+.qbtn{display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:none;padding:6px 2px;border-radius:var(--r-md);cursor:pointer;color:var(--fg);font:inherit;min-height:88px}
+.qbtn:hover{background:var(--surface-2)}
+.qi{width:52px;height:52px;border-radius:18px;background:var(--brand-soft);color:var(--on-brand-soft);display:grid;place-items:center}
+.qi svg{width:24px;height:24px}
+.qi .euro{font-family:var(--font-display);font-size:22px;font-weight:800}
+.ql{font-size:13px;font-weight:700;line-height:1.1}
+.qbtn small{font-size:11px;color:var(--fg-3);margin-top:-4px;white-space:nowrap}
+.sec-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:16px 0 6px}
+.sec-head h2{font-family:var(--font-display);font-size:19px;margin:0;letter-spacing:-.01em}
+.livepill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--ok);background:var(--ok-bg);border-radius:999px;padding:3px 10px;min-height:24px}
+.livepill:empty{display:none}
+.livepill.busy svg{animation:pulse .8s ease-in-out infinite}
+.hlist{display:flex;flex-direction:column}
+.hrow{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;width:100%;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;padding:12px 2px;min-height:64px;cursor:pointer;color:inherit;font:inherit}
+.hrow:last-child{border-bottom:0}
+.hrow:hover{background:var(--surface-2)}
+.hmid{min-width:0}
+.hmid b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hmid small{display:block;font-size:12.5px;color:var(--fg-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.hrow .tm{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.hrow .tm .small{display:none}
+.hrow.cancelled b,.hrow.cancelled .minutes{text-decoration:line-through;color:var(--fg-3)}
+.seeall{width:100%;margin-top:12px}
+.hello{font-size:21px;margin:0 0 10px}
+.quick{margin:10px 0 2px}
+.qi{width:46px;height:46px;border-radius:16px}
+.qbtn{min-height:76px;gap:4px}
+.sec-head{margin-top:10px}
