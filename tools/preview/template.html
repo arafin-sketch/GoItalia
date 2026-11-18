@@ -1,0 +1,1135 @@
+<title>ItaliaNow Preview</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a phone-shaped app (full screen on phones) — full-bleed transit map behind a draggable bottom sheet; on wide screens a quiet data panel sits beside it. */
+:root{
+  --brand:#0B6B4F; --on-brand:#FFFFFF; --brand-soft:#D3EFE3; --on-brand-soft:#06402F;
+  --bg:#EEF2EF; --surface:#FFFFFF; --surface-2:#F3F6F4; --surface-3:#E6ECE8;
+  --fg:#16201B; --fg-2:#46544D; --fg-3:#66746D; --line:#D5DDD8;
+  --map-bg:#EDF1EC; --map-grid:#DFE6E0; --map-net:#B9C4BD; --map-label:#5B6A62;
+  --late:#B3261E; --late-bg:#FBE3E0; --ok:#146C2E; --ok-bg:#DDF3E1; --warn:#7A4F00; --warn-bg:#FFEFC7;
+  --strike:#8C1D18; --strike-bg:#FFDAD5;
+  --shadow:0 1px 2px rgba(10,30,20,.08),0 6px 24px rgba(10,30,20,.10);
+  --font-display:"Manrope",ui-sans-serif,system-ui,sans-serif;
+  --font-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --r-lg:22px; --r-md:14px; --r-sm:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --brand:#5FD3A6; --on-brand:#00382A; --brand-soft:#0F3A2D; --on-brand-soft:#BFF0DA;
+  --bg:#0B0F0D; --surface:#151B18; --surface-2:#1C2420; --surface-3:#25302A;
+  --fg:#E4EBE7; --fg-2:#B4C0B9; --fg-3:#8E9B94; --line:#2C3832;
+  --map-bg:#101613; --map-grid:#18211C; --map-net:#36443C; --map-label:#8E9B94;
+  --late:#FFB4AB; --late-bg:#5C1510; --ok:#8BDA9C; --ok-bg:#12381D; --warn:#FFD27A; --warn-bg:#3D2C00;
+  --strike:#FFDAD5; --strike-bg:#6B1A14;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 28px rgba(0,0,0,.45); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --brand:#5FD3A6; --on-brand:#00382A; --brand-soft:#0F3A2D; --on-brand-soft:#BFF0DA;
+  --bg:#0B0F0D; --surface:#151B18; --surface-2:#1C2420; --surface-3:#25302A;
+  --fg:#E4EBE7; --fg-2:#B4C0B9; --fg-3:#8E9B94; --line:#2C3832;
+  --map-bg:#101613; --map-grid:#18211C; --map-net:#36443C; --map-label:#8E9B94;
+  --late:#FFB4AB; --late-bg:#5C1510; --ok:#8BDA9C; --ok-bg:#12381D; --warn:#FFD27A; --warn-bg:#3D2C00;
+  --strike:#FFDAD5; --strike-bg:#6B1A14;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 28px rgba(0,0,0,.45); color-scheme:dark}
+
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:border-box}
+*{box-sizing:border-box}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.tnum{font-variant-numeric:tabular-nums}
+
+.stage{display:flex;gap:40px;justify-content:center;align-items:flex-start;padding-block:24px;min-height:100%}
+.device{position:relative;width:400px;max-width:100%;height:min(860px,calc(100vh - 48px));min-height:620px;border-radius:34px;overflow:hidden;
+  background:var(--map-bg);box-shadow:var(--shadow),0 0 0 1px var(--line);flex:none;overflow:clip}
+.aside{max-width:380px;min-width:0;padding-top:8px}
+.aside h1{font-family:var(--font-display);font-size:30px;line-height:1.1;margin:0 0 6px;letter-spacing:-.02em;text-wrap:balance}
+.aside .lede{color:var(--fg-2);margin:0 0 20px}
+.aside h2{font-family:var(--font-display);font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-3);margin:22px 0 8px}
+.aside ul{margin:0;padding-left:18px;color:var(--fg-2)}
+.aside li{margin:4px 0}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px}
+.stat b{display:block;font-family:var(--font-display);font-size:22px}
+.stat span{font-size:12px;color:var(--fg-3)}
+@media (max-width:860px){
+  body{padding-left:0;padding-right:0}
+  .stage{padding-block:0;display:block}
+  .device{width:100%;height:100vh;height:100dvh;min-height:0;border-radius:0;box-shadow:none}
+  .aside{display:none}
+}
+
+/* map */
+#map{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
+.map-ctrls{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 168px);display:flex;flex-direction:column;gap:8px;z-index:3}
+.fab{width:48px;height:48px;border-radius:14px;border:0;background:var(--surface);color:var(--fg);box-shadow:var(--shadow);display:grid;place-items:center}
+.fab svg{width:22px;height:22px}
+.topbar{position:absolute;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 12px);z-index:4;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.topbar>*{pointer-events:auto}
+.brandbar{display:flex;align-items:center;gap:8px}
+.logo{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:999px;padding:6px 14px 6px 6px;box-shadow:var(--shadow);font-family:var(--font-display);font-weight:800;letter-spacing:-.01em;min-height:44px}
+.logo i{width:32px;height:32px;border-radius:50%;background:var(--brand);display:grid;place-items:center}
+.logo i svg{width:20px;height:20px;color:var(--on-brand)}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;border-radius:999px;padding:5px 10px;min-height:28px;box-shadow:var(--shadow);background:var(--surface);white-space:nowrap}
+.badge .dot{width:8px;height:8px;border-radius:50%}
+.badge.live .dot{background:var(--ok)}
+.badge.off{background:var(--warn-bg);color:var(--warn)}
+.badge.off .dot{background:var(--warn)}
+.spacer{flex:1}
+.strike{display:flex;gap:10px;align-items:flex-start;background:var(--strike-bg);color:var(--strike);border-radius:var(--r-md);padding:10px 12px;box-shadow:var(--shadow);font-size:13px}
+.strike svg{flex:none;width:20px;height:20px;margin-top:1px}
+.strike a{color:inherit;font-weight:700}
+.strike button{margin-left:auto;background:none;border:0;min-width:32px;min-height:32px;color:inherit;font-size:18px;line-height:1}
+
+/* sheet */
+.sheet{position:absolute;left:0;right:0;bottom:0;height:92%;z-index:5;background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;
+  box-shadow:0 -6px 28px rgba(0,0,0,.16);display:flex;flex-direction:column;transform:translateY(60%);transition:transform .32s cubic-bezier(.2,.8,.2,1)}
+.sheet.dragging{transition:none}
+.grab{flex:none;height:28px;display:grid;place-items:center;cursor:grab;touch-action:none}
+.grab span{width:40px;height:5px;border-radius:3px;background:var(--line)}
+.sheet-body{flex:1;overflow:auto;padding:0 16px 96px;overscroll-behavior:contain}
+.nav{position:absolute;left:0;right:0;bottom:0;z-index:6;display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface-2);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav button{border:0;background:none;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12px;font-weight:600;color:var(--fg-2)}
+.nav button i{width:56px;height:30px;border-radius:15px;display:grid;place-items:center;transition:background .2s}
+.nav button svg{width:22px;height:22px}
+.nav button[aria-current="page"]{color:var(--fg)}
+.nav button[aria-current="page"] i{background:var(--brand-soft);color:var(--on-brand-soft)}
+
+h2.title{font-family:var(--font-display);font-size:22px;letter-spacing:-.01em;margin:4px 0 12px;text-wrap:balance}
+h3.sub{font-family:var(--font-display);font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-3);margin:20px 0 8px}
+.muted{color:var(--fg-3)}
+.small{font-size:13px}
+
+/* planner */
+.planner{background:var(--surface-2);border-radius:var(--r-md);padding:6px;display:grid;grid-template-columns:1fr 48px;gap:0 4px;position:relative}
+.field{display:flex;align-items:center;gap:10px;padding:0 10px;min-height:50px;border-radius:var(--r-sm)}
+.field:focus-within{background:var(--surface)}
+.field .pin{width:12px;height:12px;border-radius:50%;border:3px solid var(--brand);flex:none}
+.field .pin.to{border-radius:3px;background:var(--fg);border-color:var(--fg)}
+.field input{flex:1;min-width:0;border:0;background:none;outline:none;font-size:16px;min-height:48px}
+.field input::placeholder{color:var(--fg-3)}
+.field+.field{border-top:1px solid var(--line)}
+.swap{grid-column:2;grid-row:1/3;align-self:center;width:44px;height:44px;border-radius:50%;border:0;background:var(--surface);display:grid;place-items:center;box-shadow:0 0 0 1px var(--line)}
+.swap svg{width:20px;height:20px}
+.iconbtn{border:0;background:none;min-width:44px;min-height:44px;display:grid;place-items:center;border-radius:50%;color:var(--fg-2)}
+.iconbtn svg{width:20px;height:20px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:0 14px;min-height:40px;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--brand-soft);border-color:transparent;color:var(--on-brand-soft);font-weight:600}
+.chip svg{width:16px;height:16px}
+.seg{display:flex;background:var(--surface-2);border-radius:999px;padding:3px;gap:2px}
+.seg button{border:0;background:none;border-radius:999px;min-height:40px;padding:0 12px;font-size:13px;font-weight:600;color:var(--fg-2);flex:1;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.timein{border:1px solid var(--line);background:var(--surface);border-radius:var(--r-sm);min-height:44px;padding:0 10px;font-size:14px;width:100%}
+.btn{border:0;border-radius:999px;min-height:48px;padding:0 20px;font-weight:700;background:var(--brand);color:var(--on-brand);display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.tonal{background:var(--brand-soft);color:var(--on-brand-soft)}
+.btn.text{background:none;color:var(--brand);padding:0 12px}
+.btn svg{width:18px;height:18px}
+
+.suggest{list-style:none;margin:8px 0 0;padding:0}
+.suggest li button{width:100%;text-align:left;border:0;background:none;display:flex;gap:12px;align-items:center;padding:8px 4px;min-height:56px;border-radius:var(--r-sm)}
+.suggest li button:hover,.suggest li button.active{background:var(--surface-2)}
+.suggest .ic{width:36px;height:36px;border-radius:50%;background:var(--surface-3);display:grid;place-items:center;flex:none;color:var(--fg-2)}
+.suggest .ic svg{width:18px;height:18px}
+.suggest .t{font-weight:600}
+.suggest .s{font-size:13px;color:var(--fg-3);display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.src{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:1px 6px;border-radius:4px;background:var(--surface-3);color:var(--fg-2)}
+
+/* line chips */
+.lc{display:inline-flex;align-items:center;justify-content:center;gap:3px;min-width:26px;height:24px;padding:0 7px;border-radius:6px;font-weight:700;font-size:13px;line-height:1;white-space:nowrap}
+.lc.metro{border-radius:50%;min-width:24px;padding:0}
+.lc.metro.wide{border-radius:12px;padding:0 7px}
+.lc svg{width:14px;height:14px}
+.lc.sm{height:20px;min-width:20px;font-size:11px;padding:0 5px}
+.lc.metro.sm{padding:0}
+
+/* results */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px;display:block;width:100%;text-align:left}
+button.card:hover{border-color:var(--fg-3)}
+.list{display:flex;flex-direction:column;gap:10px}
+.res-top{display:flex;align-items:baseline;gap:10px}
+.res-time{font-family:var(--font-display);font-weight:800;font-size:20px;letter-spacing:-.01em}
+.res-dur{margin-left:auto;font-weight:700}
+.res-legs{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:10px;color:var(--fg-3)}
+.res-legs .walk{display:inline-flex;align-items:center;gap:1px;font-size:12px}
+.res-legs .walk svg{width:16px;height:16px}
+.res-legs .sep{width:10px;height:10px;opacity:.6}
+.res-meta{display:flex;gap:10px;margin-top:8px;font-size:13px;color:var(--fg-2);flex-wrap:wrap;align-items:center}
+.delay{display:inline-flex;align-items:center;font-size:12px;font-weight:700;border-radius:6px;padding:2px 6px;white-space:nowrap}
+.delay.late{background:var(--late-bg);color:var(--late)}
+.delay.ontime{background:var(--ok-bg);color:var(--ok)}
+.delay.cx{background:var(--late);color:var(--surface)}
+.strike-tag{background:var(--strike-bg);color:var(--strike)}
+.est{font-size:12px;color:var(--fg-3)}
+.tag{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--brand)}
+
+/* detail timeline */
+.tl{position:relative;margin-top:6px}
+.tl-row{display:grid;grid-template-columns:52px 22px 1fr;gap:0 10px;min-height:40px}
+.tl-time{font-weight:700;font-size:14px;padding-top:1px;text-align:right}
+.tl-time s{display:block;font-weight:500;color:var(--fg-3);font-size:12px}
+.tl-rail{position:relative;display:flex;justify-content:center}
+.tl-rail::before{content:"";position:absolute;top:0;bottom:0;width:5px;border-radius:3px;background:var(--c,var(--line))}
+.tl-rail.walk::before{width:0;border-left:3px dotted var(--fg-3);background:none}
+.tl-rail .node{position:relative;z-index:1;width:16px;height:16px;border-radius:50%;background:var(--surface);border:4px solid var(--c,var(--fg));margin-top:2px}
+.tl-rail.first::before{top:10px}
+.tl-rail.last::before{bottom:calc(100% - 10px)}
+.tl-body{padding-bottom:14px;min-width:0}
+.tl-body .stn{font-weight:700}
+.tl-body .info{font-size:13px;color:var(--fg-2);display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.plat{display:inline-flex;align-items:center;font-size:12px;font-weight:700;border:1.5px solid var(--fg-2);border-radius:5px;padding:0 5px;color:var(--fg)}
+details.stops summary{cursor:pointer;font-size:13px;color:var(--fg-2);min-height:32px;display:flex;align-items:center;list-style:none}
+details.stops summary::-webkit-details-marker{display:none}
+details.stops ol{margin:2px 0 0;padding-left:16px;font-size:13px;color:var(--fg-2)}
+.alert svg{width:18px;height:18px;flex:none;margin-top:1px}
+.alert{display:flex;gap:8px;align-items:flex-start;font-size:13px;border-radius:var(--r-sm);padding:8px 10px;background:var(--warn-bg);color:var(--warn);margin-top:6px}
+.alert.strk{background:var(--strike-bg);color:var(--strike)}
+
+/* departures */
+.stop-card{border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
+.stop-head{display:flex;gap:10px;align-items:center;padding:12px 14px;background:var(--surface-2)}
+.stop-head b{flex:1;min-width:0}
+.dep{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);min-height:52px}
+.dep .hd{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+.dep .hd small{display:block;color:var(--fg-3);font-size:12px}
+.dep .tm{text-align:right;font-weight:700}
+.dep .tm s{display:block;font-weight:500;color:var(--fg-3);font-size:12px}
+.dep.cancelled .hd,.dep.cancelled .tm b{text-decoration:line-through;color:var(--fg-3)}
+
+/* lines */
+.line-row{display:flex;gap:12px;align-items:center;width:100%;border:0;background:none;text-align:left;padding:8px 4px;min-height:56px;border-radius:var(--r-sm)}
+.line-row:hover{background:var(--surface-2)}
+.line-row .t{font-weight:600;min-width:0}
+.line-row .s{font-size:13px;color:var(--fg-3)}
+.diagram{list-style:none;margin:8px 0 0;padding:0}
+.diagram li{display:grid;grid-template-columns:28px 1fr;gap:10px;min-height:44px}
+.diagram .rail{position:relative;display:flex;justify-content:center}
+.diagram .rail::before{content:"";position:absolute;top:0;bottom:0;width:6px;background:var(--c)}
+.diagram li:first-child .rail::before{top:50%}
+.diagram li:last-child .rail::before{bottom:50%}
+.diagram .rail i{position:relative;z-index:1;align-self:center;width:14px;height:14px;border-radius:50%;background:var(--surface);border:3px solid var(--c)}
+.diagram .rail i.x{width:18px;height:18px;border-color:var(--fg);border-width:3px}
+.diagram button{border:0;background:none;text-align:left;padding:6px 4px;display:flex;flex-direction:column;justify-content:center;border-radius:var(--r-sm);min-height:44px}
+.diagram button:hover{background:var(--surface-2)}
+.diagram .xs{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}
+.bars{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;align-items:end;height:96px;margin-top:8px}
+.bars div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;font-size:11px;color:var(--fg-3)}
+.bars span.b{width:100%;border-radius:6px 6px 2px 2px;background:var(--c);min-height:3px}
+.bars b{font-size:12px;color:var(--fg)}
+.kv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kv div{background:var(--surface-2);border-radius:var(--r-sm);padding:8px 10px}
+.kv b{display:block;font-size:16px}
+.kv span{font-size:12px;color:var(--fg-3)}
+
+/* settings */
+.set{display:flex;align-items:center;gap:12px;padding:10px 4px;min-height:56px;border-bottom:1px solid var(--line)}
+.set .t{flex:1;min-width:0}
+.set .t small{display:block;color:var(--fg-3);font-size:13px}
+.switch{position:relative;width:52px;height:32px;flex:none}
+.switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;z-index:1}
+.switch span{position:absolute;inset:0;border-radius:16px;background:var(--surface-3);border:2px solid var(--fg-3);transition:.2s}
+.switch span::after{content:"";position:absolute;top:4px;left:4px;width:20px;height:20px;border-radius:50%;background:var(--fg-3);transition:.2s}
+.switch input:checked+span{background:var(--brand);border-color:var(--brand)}
+.switch input:checked+span::after{left:24px;background:var(--on-brand)}
+.switch input:focus-visible+span{outline:3px solid var(--brand);outline-offset:2px}
+.linkrow{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;text-align:left;padding:10px 4px;min-height:56px;border-bottom:1px solid var(--line)}
+.linkrow svg{width:20px;height:20px;color:var(--fg-3)}
+.prose{font-size:14px;color:var(--fg-2);max-width:65ch}
+.prose h4{color:var(--fg);font-size:15px;margin:16px 0 4px}
+.prose p{margin:0 0 8px}
+.attr{border-bottom:1px solid var(--line);padding:10px 0;font-size:14px}
+.attr b{display:block}
+.attr a{color:var(--brand)}
+a{color:var(--brand)}
+
+/* states */
+.empty{text-align:center;padding:28px 12px;color:var(--fg-2)}
+.empty svg{width:44px;height:44px;color:var(--fg-3)}
+.empty b{display:block;color:var(--fg);font-size:16px;margin:8px 0 4px}
+.skel{border-radius:var(--r-md);background:linear-gradient(90deg,var(--surface-2) 0%,var(--surface-3) 40%,var(--surface-2) 80%);background-size:300% 100%;animation:sh 1.2s infinite linear;height:104px}
+@keyframes sh{from{background-position:100% 0}to{background-position:-200% 0}}
+.back{display:inline-flex;align-items:center;gap:4px;border:0;background:none;color:var(--fg-2);font-weight:600;min-height:44px;padding:0 8px 0 0}
+.back svg{width:20px;height:20px}
+.snap{font-size:12px;color:var(--fg-3);display:flex;align-items:center;gap:6px;margin:4px 0 10px}
+.snap svg{width:14px;height:14px}
+.toast{position:absolute;left:50%;bottom:84px;transform:translateX(-50%);z-index:9;background:var(--fg);color:var(--surface);padding:10px 16px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+.modal{position:absolute;inset:0;z-index:10;background:rgba(0,0,0,.45);display:grid;place-items:end center;padding:16px}
+.modal .card{max-width:420px;padding:20px;border:0}
+.modal h3{font-family:var(--font-display);margin:0 0 8px;font-size:19px}
+.fade-in{animation:fi .28s ease both}
+@keyframes fi{from{opacity:.001;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="stage">
+  <div class="device" id="app" lang="en">
+    <canvas id="map" role="img" aria-label="Transit map"></canvas>
+    <div class="topbar">
+      <div class="brandbar">
+        <div class="logo"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17V7a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v10"/><path d="M5 12h14"/><circle cx="8.5" cy="15.5" r=".6" fill="currentColor"/><circle cx="15.5" cy="15.5" r=".6" fill="currentColor"/><path d="m7 21 2-3M17 21l-2-3"/></svg></i>ItaliaNow</div>
+        <div class="spacer"></div>
+        <span id="netBadge"></span>
+      </div>
+      <div id="strikeSlot"></div>
+    </div>
+    <div class="map-ctrls">
+      <button class="fab" id="zin" aria-label="Zoom in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button class="fab" id="zout" aria-label="Zoom out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+      <button class="fab" id="locate" aria-label="Use my location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+    </div>
+    <section class="sheet" id="sheet" aria-label="Panel">
+      <div class="grab" id="grab" role="button" tabindex="0" aria-label="Resize panel"><span></span></div>
+      <div class="sheet-body" id="body"></div>
+    </section>
+    <nav class="nav" id="nav" aria-label="Main"></nav>
+    <div id="overlay"></div>
+  </div>
+
+  <aside class="aside">
+    <h1>ItaliaNow, running on real data</h1>
+    <p class="lede">An interactive preview of the app before the Flutter build. Everything you see comes from official GTFS feeds or real Transitous responses.</p>
+    <div class="stat-row" id="stats"></div>
+    <h2>Try</h2>
+    <ul>
+      <li>Plan: tap a suggestion chip, or type “Termini” then “Colosseo”.</li>
+      <li>Plan any two stations in one city, for example Loreto → Porta Genova, to see offline routing.</li>
+      <li>Nearby: real departures with live delays and strike alerts.</li>
+      <li>Lines: diagrams, frequencies, first and last trains.</li>
+      <li>More: switch to Italiano, dark mode, or simulate offline.</li>
+    </ul>
+    <h2>Where the data comes from</h2>
+    <ul id="srcList"></ul>
+    <h2>Limits of this preview</h2>
+    <ul>
+      <li>The page can't call outside services, so the Transitous results were recorded once, at the time shown. The app queries Transitous live and refreshes departures every 30 s.</li>
+      <li>Map tiles from MapTiler or Stadia can't load here. The map shows the transit network on a plain ground.</li>
+      <li>Brescia and the regional rail networks come in the next data build.</li>
+    </ul>
+  </aside>
+</div>
+
+<script id="net-data" type="application/json">__NET__</script>
+<script id="live-data" type="application/json">__LIVE__</script>
+<script>
+(() => {
+"use strict";
+const NET = JSON.parse(document.getElementById("net-data").textContent);
+const LIVE = JSON.parse(document.getElementById("live-data").textContent);
+const TZ = "Europe/Rome";
+const $ = (s, r = document) => r.querySelector(s);
+const app = $("#app");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("itnow:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("itnow:" + k, JSON.stringify(v)); } catch {} }
+};
+
+/* ---------------- i18n ---------------- */
+const STR = {
+ en: {
+  plan:"Plan", nearby:"Nearby", lines:"Lines", saved:"Saved", more:"More",
+  from:"From", to:"To", choose_start:"Choose start", choose_dest:"Choose destination", swap:"Swap start and destination",
+  now:"Now", depart_at:"Depart at", arrive_by:"Arrive by", search:"Search routes", fewest:"Fewest changes", fastest:"Fastest",
+  try_these:"Try a real journey", my_location:"Use my location", pick_map:"Pick on map",
+  live:"Live", offline:"Offline", offline_note:"No connection to Transitous. Showing routes from the built-in network.",
+  snapshot:"Transitous results recorded {t}", min:"min", h:"h", changes:n => n === 0 ? "Direct" : n === 1 ? "1 change" : `${n} changes`,
+  walk:"Walk", walk_m:"Walk {d}", stops:n => n === 1 ? "1 stop" : `${n} stops`, platform:"Platform", towards:"towards",
+  on_time:"On time", late:"+{m} min", early:"−{m} min", cancelled:"Cancelled", est:"≈ times from timetable frequency",
+  every:"every {m} min", no_service:"No service at this hour", results:"Routes", details:"Journey", back:"Back",
+  no_routes:"No route found", no_routes_s:"These places aren't connected by the built-in metro and tram network. Live search covers buses and trains across Italy.",
+  same_city:"Pick two places in the same city for offline routing.", retry:"Try again", pick_both:"Choose a start and a destination",
+  arrive:"Arrive", depart:"Depart", total_walk:"{d} walking", via:"via",
+  nearby_title:"Departures nearby", within:"Stops within 500 m", choose_area:"Choose an area",
+  loc_title:"Allow location?", loc_body:"ItaliaNow uses your location only to find stops near you and as the start of a route request. It's never stored or sent anywhere else.",
+  loc_allow:"Allow", loc_deny:"Not now", loc_denied:"Location is off. Pick an area or search for a stop instead.",
+  lines_title:"Lines", metro:"Metro", tram:"Tram", rail:"Rail", funicular:"Funicular",
+  first:"First", last:"Last", stations:"Stations", frequency:"Weekday frequency", branch:"Branch",
+  station:"Station", served_by:"Lines", interchange:"Interchanges", next_dep:"Next departures", walk_to:"{t} min walk",
+  saved_title:"Saved", home:"Home", work:"Work", add_home:"Set home", add_work:"Set work", recent:"Recent searches",
+  no_recent:"Searches you make appear here.", set_from_search:"Pick a place in Plan, then save it here.", save_as:"Save as",
+  settings:"Settings", language:"Language", lang_system:"Phone language", theme:"Theme", system:"System", light:"Light", dark:"Dark",
+  crash:"Send crash reports", crash_s:"Anonymous reports via Sentry. Off unless you turn it on.",
+  sim_off:"Simulate offline", sim_off_s:"Use only the built-in network, as if there were no connection.",
+  privacy:"Privacy policy", attributions:"Attributions", strikes:"Strike calendar", about:"About",
+  strike_today:"Strike today. Service runs only in guaranteed hours.", strike_soon:"Strike on {d}", strike_more:"Details",
+  strike_cal:"Official calendar",
+  data_from:"Data", net_stats:"{l} lines · {s} stations",
+  loading:"Searching…", estimated:"Estimated",
+  place:"Place", stop:"Stop", address:"Address", station_kind:"Station",
+  ref_day:"Timetable reference day {d}", license:"Licence", open_link:"Open",
+ },
+ it: {
+  plan:"Percorso", nearby:"Vicino", lines:"Linee", saved:"Salvati", more:"Altro",
+  from:"Da", to:"A", choose_start:"Scegli partenza", choose_dest:"Scegli destinazione", swap:"Inverti partenza e destinazione",
+  now:"Adesso", depart_at:"Parti alle", arrive_by:"Arriva entro", search:"Cerca percorsi", fewest:"Meno cambi", fastest:"Più veloce",
+  try_these:"Prova un viaggio reale", my_location:"Usa la mia posizione", pick_map:"Scegli sulla mappa",
+  live:"In tempo reale", offline:"Offline", offline_note:"Nessuna connessione a Transitous. Percorsi calcolati sulla rete integrata.",
+  snapshot:"Risultati Transitous registrati {t}", min:"min", h:"h", changes:n => n === 0 ? "Diretto" : n === 1 ? "1 cambio" : `${n} cambi`,
+  walk:"A piedi", walk_m:"A piedi {d}", stops:n => n === 1 ? "1 fermata" : `${n} fermate`, platform:"Binario", towards:"direzione",
+  on_time:"In orario", late:"+{m} min", early:"−{m} min", cancelled:"Soppresso", est:"≈ orari stimati dalla frequenza",
+  every:"ogni {m} min", no_service:"Nessun servizio a quest'ora", results:"Percorsi", details:"Viaggio", back:"Indietro",
+  no_routes:"Nessun percorso", no_routes_s:"Questi luoghi non sono collegati dalla rete metro e tram integrata. La ricerca online copre bus e treni in tutta Italia.",
+  same_city:"Per il calcolo offline scegli due luoghi nella stessa città.", retry:"Riprova", pick_both:"Scegli partenza e destinazione",
+  arrive:"Arrivo", depart:"Partenza", total_walk:"{d} a piedi", via:"via",
+  nearby_title:"Partenze vicine", within:"Fermate entro 500 m", choose_area:"Scegli una zona",
+  loc_title:"Consentire la posizione?", loc_body:"ItaliaNow usa la tua posizione solo per trovare le fermate vicine e come partenza della ricerca. Non viene salvata né inviata altrove.",
+  loc_allow:"Consenti", loc_deny:"Non ora", loc_denied:"Posizione disattivata. Scegli una zona o cerca una fermata.",
+  lines_title:"Linee", metro:"Metro", tram:"Tram", rail:"Ferrovia", funicular:"Funicolare",
+  first:"Prima", last:"Ultima", stations:"Stazioni", frequency:"Frequenza feriale", branch:"Diramazione",
+  station:"Stazione", served_by:"Linee", interchange:"Interscambi", next_dep:"Prossime partenze", walk_to:"{t} min a piedi",
+  saved_title:"Salvati", home:"Casa", work:"Lavoro", add_home:"Imposta casa", add_work:"Imposta lavoro", recent:"Ricerche recenti",
+  no_recent:"Qui compaiono le tue ricerche.", set_from_search:"Scegli un luogo in Percorso, poi salvalo qui.", save_as:"Salva come",
+  settings:"Impostazioni", language:"Lingua", lang_system:"Lingua del telefono", theme:"Tema", system:"Sistema", light:"Chiaro", dark:"Scuro",
+  crash:"Invia segnalazioni di arresto", crash_s:"Segnalazioni anonime tramite Sentry. Disattivate finché non le attivi.",
+  sim_off:"Simula offline", sim_off_s:"Usa solo la rete integrata, come senza connessione.",
+  privacy:"Informativa privacy", attributions:"Attribuzioni", strikes:"Calendario scioperi", about:"Informazioni",
+  strike_today:"Sciopero oggi. Servizio garantito solo nelle fasce previste.", strike_soon:"Sciopero {d}", strike_more:"Dettagli",
+  strike_cal:"Calendario ufficiale",
+  data_from:"Dati", net_stats:"{l} linee · {s} stazioni",
+  loading:"Ricerca…", estimated:"Stimato",
+  place:"Luogo", stop:"Fermata", address:"Indirizzo", station_kind:"Stazione",
+  ref_day:"Giorno di riferimento orario {d}", license:"Licenza", open_link:"Apri",
+ }
+};
+const sysLang = (navigator.language || "en").toLowerCase().startsWith("it") ? "it" : "en";
+const S = {
+  langPref: store.get("lang", "system"), themePref: store.get("theme", "system"),
+  crash: store.get("crash", false), simOffline: store.get("simOffline", false),
+  tab: "plan", view: null, params: {}, from: null, to: null, timeMode: "now", timeVal: "", pref: "fastest",
+  focus: null, recents: store.get("recents", []), home: store.get("home", null), work: store.get("work", null),
+  strikeDismissed: false, nearbyArea: "colosseo", linesCity: "rome", locDenied: false,
+};
+const lang = () => S.langPref === "system" ? sysLang : S.langPref;
+const t = (k, vars) => { let s = STR[lang()][k] ?? STR.en[k] ?? k; if (typeof s === "function") return s(vars); if (vars) for (const [a, b] of Object.entries(vars)) s = s.replace("{" + a + "}", b); return s; };
+const locale = () => lang() === "it" ? "it-IT" : "en-GB";
+const fmtTime = d => new Intl.DateTimeFormat(locale(), { hour: "2-digit", minute: "2-digit", timeZone: TZ }).format(d);
+const fmtDay = d => new Intl.DateTimeFormat(locale(), { weekday: "short", day: "numeric", month: "short", timeZone: TZ }).format(d);
+const fmtDayTime = d => new Intl.DateTimeFormat(locale(), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: TZ, timeZoneName: "short" }).format(d);
+const nf = (n, o) => new Intl.NumberFormat(locale(), o).format(n);
+const fmtDur = s => { const m = Math.round(s / 60); if (m < 60) return `${nf(m)} ${t("min")}`; return `${nf(Math.floor(m / 60))} ${t("h")} ${String(m % 60).padStart(2, "0")}`; };
+const fmtDist = m => (m = Math.round(m / 10) * 10) < 1000 ? `${nf(Math.round(m / 10) * 10)} m` : `${nf(m / 1000, { maximumFractionDigits: 1 })} km`;
+const secOfDay = s => { const h = Math.floor(s / 3600) % 24, m = Math.floor(s % 3600 / 60); return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`; };
+function romeParts(d) {
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-GB", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }).formatToParts(d).map(x => [x.type, x.value]));
+  return { y: +p.year, mo: +p.month, d: +p.day, h: +p.hour, mi: +p.minute, s: +p.second };
+}
+function romeToDate(y, mo, d, h, mi) { // wall-clock in Rome -> Date
+  let guess = Date.UTC(y, mo - 1, d, h, mi);
+  for (let i = 0; i < 2; i++) { const p = romeParts(new Date(guess)); guess -= (Date.UTC(p.y, p.mo - 1, p.d, p.h, p.mi) - Date.UTC(y, mo - 1, d, h, mi)); }
+  return new Date(guess);
+}
+
+/* ---------------- theme ---------------- */
+function applyTheme() {
+  const r = document.documentElement;
+  if (S.themePref === "system") r.removeAttribute("data-theme"); else r.setAttribute("data-theme", S.themePref);
+  app.lang = lang();
+  requestAnimationFrame(() => map.draw());
+}
+const mq = matchMedia("(prefers-color-scheme: dark)");
+mq.addEventListener?.("change", () => map.draw());
+const cssVar = n => getComputedStyle(app).getPropertyValue(n).trim();
+
+/* ---------------- icons ---------------- */
+const I = {
+  walk:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="13" cy="4" r="2"/><path d="M13.5 7.5 10 9l-2 4 1.6.8 1.5-2.9 1.1-.4-1.4 6.5-2.8 3.9 1.6 1.2 3-4.1.7-2.3 2 2V22h2v-5.6l-2.3-2.4.6-3.2.8 1.6 2.9 1.6.9-1.8-2.3-1.3-1.6-3.1c-.4-.8-1.3-1.1-2.1-.9z"/></svg>',
+  metro:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C8 2 5 2.5 5 6v9.5A3.5 3.5 0 0 0 8.5 19L7 20.5v.5h2l2-2h2l2 2h2v-.5L15.5 19a3.5 3.5 0 0 0 3.5-3.5V6c0-3.5-3-4-7-4zM8.5 17a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm2.5-7H7V6h4v4zm4.5 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm1.5-7h-4V6h4v4z"/></svg>',
+  tram:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 5l.75-1.5H17V2H7v1.5h4.75L11 5c-3.13.09-6 .73-6 3.5V17c0 1.5 1.11 2.73 2.55 2.95L6 21.5v.5h2.23l2-2H14l2 2h2v-.5L16.45 20h-.01A3 3 0 0 0 19 17V8.5c0-2.77-2.87-3.41-6-3.5zm-1 13.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5-4.5H7V9h10v5z"/></svg>',
+  bus:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 16c0 .88.39 1.67 1 2.22V20a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1h8v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm9 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm1.5-6H6V6h12v5z"/></svg>',
+  rail:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2c-4 0-8 .5-8 4v9.5A3.5 3.5 0 0 0 7.5 19L6 20.5v.5h12v-.5L16.5 19a3.5 3.5 0 0 0 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM11 10H6V7h5v3zm2 0V7h5v3h-5zm3.5 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>',
+  funicular:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 20 21 6v3L5 21.5H3V20zm4-9.5 8-6.2c.9-.7 2.2-.1 2.2 1V9l-10 7.8V10.5z"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>',
+  swap:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></svg>',
+  chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  home:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>',
+  work:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 7h-4V5l-2-2h-4L8 5v2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm-6 0h-4V5h4v2z"/></svg>',
+  star:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.4 14l-1.6 7z"/></svg>',
+  map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m9 4-6 2v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>',
+  near:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/></svg>',
+  lines:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 3v18M12 3v6a4 4 0 0 0 4 4h0a4 4 0 0 1 4 4v4"/><circle cx="5" cy="8" r="1.6" fill="currentColor"/><circle cx="5" cy="16" r="1.6" fill="currentColor"/></svg>',
+  more:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+  route:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.5"/></svg>',
+  warn:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>',
+  off:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 8.8a15 15 0 0 1 4.3-2.6M9.8 5.2A15 15 0 0 1 22 8.8M5 12.5a10 10 0 0 1 3.5-2M12.6 9.6A10 10 0 0 1 19 12.5M8.5 16a5 5 0 0 1 7 0M3 3l18 18"/></svg>',
+  ext:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4 10 14M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>',
+};
+const modeIcon = m => ({ WALK: I.walk, SUBWAY: I.metro, METRO: I.metro, metro: I.metro, TRAM: I.tram, tram: I.tram, BUS: I.bus, COACH: I.bus,
+  RAIL: I.rail, REGIONAL_RAIL: I.rail, HIGHSPEED_RAIL: I.rail, LONG_DISTANCE: I.rail, NIGHT_RAIL: I.rail, REGIONAL_FAST_RAIL: I.rail, SUBURBAN: I.rail, rail: I.rail,
+  FUNICULAR: I.funicular, CABLE_CAR: I.funicular, funicular: I.funicular }[m] || I.bus);
+
+/* ---------------- colours / chips ---------------- */
+function lum(hex) { const c = hex.match(/\w\w/g).map(x => parseInt(x, 16) / 255).map(v => v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; }
+function onColor(hex) { const L = lum(hex); const cw = 1.05 / (L + .05), cb = (L + .05) / (0.0175 + .05); return cw >= cb ? "#FFFFFF" : "#111111"; }
+function chip(name, color, mode, sm) {
+  const c = (color || "5B6770").replace("#", "").toUpperCase();
+  const isMetro = /^(metro|SUBWAY)$/.test(mode);
+  const wide = String(name).length > 2;
+  return `<span class="lc ${isMetro ? "metro" : ""} ${isMetro && wide ? "wide" : ""} ${sm ? "sm" : ""}" style="background:#${c};color:${onColor(c)}">${mode && !isMetro && !sm ? modeIcon(mode) : ""}${esc(name)}</span>`;
+}
+const liveName = n => { const m = /^ME([ABC]1?)$/.exec(n || ""); return m ? m[1] : n; };
+const liveMode = m => m === "SUBWAY" ? "metro" : m;
+
+/* ---------------- network index ---------------- */
+const lineById = Object.fromEntries(NET.lines.map(l => [l.id, l]));
+const cityById = Object.fromEntries(NET.cities.map(c => [c.id, c]));
+const stations = NET.stations;
+const cityOf = sid => sid.split(":")[0];
+const transfersAt = {};
+for (const [a, b, d, w] of NET.transfers) { (transfersAt[a] ||= []).push({ to: b, d, w }); (transfersAt[b] ||= []).push({ to: a, d, w }); }
+const runtime = {};
+for (const l of NET.lines) for (const [a, b, s] of l.runtime) { runtime[l.id + "|" + a + "|" + b] = s; runtime[l.id + "|" + b + "|" + a] = s; }
+function hav(a, b) { const R = 6371000, r = Math.PI / 180; const dLa = (b[0] - a[0]) * r, dLo = (b[1] - a[1]) * r; const h = Math.sin(dLa / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dLo / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); }
+const lineName = l => l.code;
+function lineTermini(l) { const b = l.branches[0]; return `${stations[b[0]].name} – ${stations[b[b.length - 1]].name}`; }
+
+/* headway band for a Rome wall-clock second-of-day */
+function bandIdx(sec) { const h = sec / 3600; const B = NET.timeBands; for (let i = 0; i < B.length; i++) if (h >= B[i][0] && h < B[i][1]) return i; return -1; }
+function headwayAt(l, sec) {
+  if (l.firstDep == null) return null;
+  const s = ((sec % 86400) + 86400) % 86400;
+  const inService = (s >= l.firstDep - 600 && s <= l.lastDep) || (l.lastDep > 86400 && s + 86400 <= l.lastDep);
+  if (!inService) return null;
+  let i = bandIdx(s); if (i < 0) i = s < 5 * 3600 ? NET.timeBands.length - 1 : 0;
+  return l.headways[i] ?? l.headways.find(x => x) ?? null;
+}
+
+/* ---------------- offline router (same algorithm as the Dart domain layer) ---------------- */
+const adj = {}; // station -> [{line, to, s}]
+for (const l of NET.lines) for (const b of l.branches) for (let i = 0; i + 1 < b.length; i++) {
+  const s = runtime[l.id + "|" + b[i] + "|" + b[i + 1]] ?? 120;
+  (adj[b[i]] ||= []).push({ line: l.id, to: b[i + 1], s });
+  (adj[b[i + 1]] ||= []).push({ line: l.id, to: b[i], s });
+}
+class Heap { constructor() { this.a = []; } push(x) { const a = this.a; a.push(x); let i = a.length - 1; while (i) { const p = (i - 1) >> 1; if (a[p][0] <= a[i][0]) break; [a[p], a[i]] = [a[i], a[p]]; i = p; } }
+  pop() { const a = this.a; const top = a[0], last = a.pop(); if (a.length) { a[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < a.length && a[l][0] < a[m][0]) m = l; if (r < a.length && a[r][0] < a[m][0]) m = r; if (m === i) break; [a[m], a[i]] = [a[i], a[m]]; i = m; } } return top; } get size() { return this.a.length; } }
+
+function accessStations(place, city) {
+  if (place.sid) return [{ sid: place.sid, walk: 0, d: 0 }];
+  const out = [];
+  for (const [sid, st] of Object.entries(stations)) {
+    if (cityOf(sid) !== city) continue;
+    const d = hav([place.lat, place.lon], [st.lat, st.lon]);
+    if (d <= 1000) out.push({ sid, walk: Math.round(d * 1.3 / 1.2), d: Math.round(d * 1.3) });
+  }
+  return out.sort((a, b) => a.walk - b.walk).slice(0, 12);
+}
+function placeCity(p) {
+  if (p.sid) return cityOf(p.sid);
+  let best = null, bd = 1e9;
+  for (const c of NET.cities) { const d = hav([p.lat, p.lon], c.center); if (d < bd) { bd = d; best = c.id; } }
+  return bd < 30000 ? best : null;
+}
+function route(from, to, depSec, pref) {
+  const city = placeCity(from), city2 = placeCity(to);
+  if (!city || city !== city2) return { error: "city" };
+  const BOARD = pref === "fewest" ? 1500 : 150; // penalty per boarding (seconds)
+  const src = accessStations(from, city), dst = accessStations(to, city);
+  const dstMap = Object.fromEntries(dst.map(d => [d.sid, d]));
+  // state key: sid|line ("" = on foot at station)
+  const best = {}, prev = {};
+  const h = new Heap();
+  for (const s of src) { const k = s.sid + "|"; best[k] = { c: s.walk, t: s.walk, b: 0 }; prev[k] = { kind: "access", walk: s.walk, d: s.d }; h.push([s.walk, k]); }
+  let goal = null, goalCost = Infinity;
+  while (h.size) {
+    const [c, k] = h.pop();
+    const cur = best[k]; if (!cur || c > cur.c) continue;
+    if (c >= goalCost) break;
+    const [sid, line] = k.split("|");
+    if (!line && dstMap[sid]) { const gc = c + dstMap[sid].walk; if (gc < goalCost) { goalCost = gc; goal = k; } }
+    const relax = (nk, nc, nt, nb, info) => { const o = best[nk]; if (!o || nc < o.c) { best[nk] = { c: nc, t: nt, b: nb }; prev[nk] = { from: k, ...info }; h.push([nc, nk]); } };
+    if (!line) {
+      // board a line here
+      const seen = new Set();
+      for (const e of adj[sid] || []) {
+        if (seen.has(e.line)) continue; seen.add(e.line);
+        const hw = headwayAt(lineById[e.line], depSec + cur.t); if (!hw) continue;
+        const wait = Math.round(hw * 30) + (cur.b ? 120 : 0); // half the headway, plus platform change time
+        relax(sid + "|" + e.line, c + wait + BOARD, cur.t + wait, cur.b + 1, { kind: "board", line: e.line, wait });
+      }
+      for (const tr of transfersAt[sid] || []) relax(tr.to + "|", c + tr.w, cur.t + tr.w, cur.b, { kind: "walk", walk: tr.w, d: tr.d });
+    } else {
+      for (const e of adj[sid] || []) if (e.line === line) relax(e.to + "|" + line, c + e.s + 20, cur.t + e.s + 20, cur.b, { kind: "ride", line, s: e.s + 20 });
+      relax(sid + "|", c, cur.t, cur.b, { kind: "alight" });
+    }
+  }
+  if (!goal) return { error: "none" };
+  // reconstruct
+  const chain = []; let k = goal;
+  while (k) { const p = prev[k]; chain.push({ k, ...p }); k = p.from; }
+  chain.reverse();
+  const legs = []; let tcur = depSec;
+  const first = chain[0];
+  if (first.walk > 0) { legs.push({ kind: "walk", from: null, to: first.k.split("|")[0], s: first.walk, d: first.d }); }
+  tcur += first.walk;
+  for (let i = 1; i < chain.length; i++) {
+    const st = chain[i], sid = st.k.split("|")[0];
+    if (st.kind === "board") { tcur += st.wait; legs.push({ kind: "ride", line: st.line, from: sid, to: sid, stops: [], dep: tcur, s: 0, wait: st.wait }); }
+    else if (st.kind === "ride") { const L = legs[legs.length - 1]; L.stops.push(sid); L.to = sid; L.s += st.s; tcur += st.s; L.arr = tcur; }
+    else if (st.kind === "walk") { legs.push({ kind: "walk", from: chain[i - 1].k.split("|")[0], to: sid, s: st.walk, d: st.d }); tcur += st.walk; }
+  }
+  const last = dstMap[goal.split("|")[0]];
+  if (last.walk > 0) { legs.push({ kind: "walk", from: goal.split("|")[0], to: null, s: last.walk, d: last.d }); tcur += last.walk; }
+  // merge consecutive walks
+  const merged = [];
+  for (const L of legs) { const P = merged[merged.length - 1]; if (P && P.kind === "walk" && L.kind === "walk") { P.to = L.to; P.s += L.s; P.d += L.d; } else merged.push(L); }
+  const rides = merged.filter(l => l.kind === "ride");
+  return { legs: merged, dep: depSec, arr: tcur, dur: tcur - depSec, transfers: Math.max(0, rides.length - 1), walk: merged.filter(l => l.kind === "walk").reduce((a, l) => a + l.d, 0) };
+}
+function offlinePlans(from, to, depSec) {
+  const out = [];
+  for (const pref of S.pref === "fewest" ? ["fewest", "fastest"] : ["fastest", "fewest"]) {
+    const r = route(from, to, depSec, pref);
+    if (r.error) return r;
+    const sig = r.legs.filter(l => l.kind === "ride").map(l => l.line).join(",");
+    if (!out.some(o => o.sig === sig)) out.push({ ...r, sig, pref });
+  }
+  if (S.timeMode === "arrive") for (const o of out) { const shift = depSec - o.arr; o.dep += shift; o.arr += shift; for (const l of o.legs) { if (l.dep != null) l.dep += shift; if (l.arr != null) l.arr += shift; } }
+  return out;
+}
+
+/* ---------------- map (canvas, web-mercator) ---------------- */
+const map = (() => {
+  const cv = $("#map"), ctx = cv.getContext("2d");
+  let W = 0, H = 0, dpr = 1, z = 12.2, c = { lat: 41.895, lon: 12.49 };
+  const layers = { city: "rome", focusLines: null, journey: null, markers: [], stationsOf: null };
+  const TS = 256;
+  const px = (lat, lon, zz = z) => { const s = TS * 2 ** zz; const x = (lon + 180) / 360 * s; const r = lat * Math.PI / 180; const y = (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * s; return [x, y]; };
+  const ll = (x, y, zz = z) => { const s = TS * 2 ** zz; const lon = x / s * 360 - 180; const n = Math.PI - 2 * Math.PI * y / s; return [180 / Math.PI * Math.atan(.5 * (Math.exp(n) - Math.exp(-n))), lon]; };
+  let pad = { top: 120, bottom: 300 };
+  function resize() { const r = cv.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1); W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; draw(); }
+  function toScreen(lat, lon) { const [x, y] = px(lat, lon); const [cx, cy] = px(c.lat, c.lon); return [x - cx + W / 2, y - cy + (H - pad.bottom + pad.top) / 2]; }
+  let raf = 0; function draw() { cancelAnimationFrame(raf); raf = requestAnimationFrame(render); }
+  function lineCoords(l) { return l.shape && l.shape.length > 1 ? [l.shape] : l.branches.map(b => b.map(s => [stations[s].lat, stations[s].lon])); }
+  function poly(pts, color, w, dash) {
+    ctx.beginPath(); pts.forEach((p, i) => { const [x, y] = toScreen(p[0], p[1]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+    ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.setLineDash(dash || []); ctx.stroke(); ctx.setLineDash([]);
+  }
+  function render() {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = cssVar("--map-bg"); ctx.fillRect(0, 0, W, H);
+    // faint grid every ~0.01°
+    ctx.strokeStyle = cssVar("--map-grid"); ctx.lineWidth = 1;
+    const step = z > 13 ? 0.005 : z > 11 ? 0.01 : 0.05;
+    const [la1, lo1] = ll(...(() => { const [cx, cy] = px(c.lat, c.lon); return [cx - W / 2, cy - H / 2]; })());
+    const [la2, lo2] = ll(...(() => { const [cx, cy] = px(c.lat, c.lon); return [cx + W / 2, cy + H / 2]; })());
+    ctx.beginPath();
+    for (let lo = Math.floor(lo1 / step) * step; lo < lo2; lo += step) { const [x] = toScreen(c.lat, lo); ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+    for (let la = Math.floor(la2 / step) * step; la < la1; la += step) { const [, y] = toScreen(la, c.lon); ctx.moveTo(0, y); ctx.lineTo(W, y); }
+    ctx.stroke();
+    const dimmed = !!(layers.journey || layers.focusLines);
+    const net = cssVar("--map-net");
+    // network of the visible cities: trams thin, metros thick, in line colours unless dimmed
+    const lines = NET.lines.filter(l => hav([c.lat, c.lon], cityById[cityOf(l.id)].center) < 60000);
+    const order = { tram: 0, funicular: 1, rail: 2, metro: 3 };
+    lines.sort((a, b) => order[a.mode] - order[b.mode]);
+    for (const l of lines) {
+      if (layers.focusLines && layers.focusLines.includes(l.id)) continue;
+      const w = l.mode === "metro" ? 4 : l.mode === "rail" ? 3 : 2;
+      for (const pts of lineCoords(l)) poly(pts, dimmed || l.mode === "tram" ? net : "#" + l.color, dimmed ? Math.max(1.5, w - 1.5) : w);
+    }
+    if (layers.focusLines) for (const id of layers.focusLines) { const l = lineById[id]; for (const pts of lineCoords(l)) { poly(pts, cssVar("--surface"), 9); poly(pts, "#" + l.color, 6); } }
+    if (layers.stationsOf) { for (const sid of layers.stationsOf) { const st = stations[sid]; const [x, y] = toScreen(st.lat, st.lon); ctx.beginPath(); ctx.arc(x, y, z > 13 ? 4.5 : 3.2, 0, 7); ctx.fillStyle = cssVar("--surface"); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = cssVar("--fg"); ctx.stroke(); } }
+    if (layers.journey) for (const seg of layers.journey) {
+      if (seg.walk) poly(seg.pts, cssVar("--fg-2"), 3, [2, 6]);
+      else { poly(seg.pts, cssVar("--surface"), 9); poly(seg.pts, "#" + seg.color, 6); }
+    }
+    // metro station dots at higher zoom
+    if (!layers.journey && !layers.stationsOf && z >= 12.5) {
+      for (const l of lines) if (l.mode === "metro") for (const b of l.branches) for (const sid of b) { const st = stations[sid]; const [x, y] = toScreen(st.lat, st.lon); if (x < -10 || y < -10 || x > W + 10 || y > H + 10) continue; ctx.beginPath(); ctx.arc(x, y, 3, 0, 7); ctx.fillStyle = cssVar("--surface"); ctx.fill(); ctx.lineWidth = 1.6; ctx.strokeStyle = "#" + l.color; ctx.stroke(); }
+    }
+    for (const m of layers.markers) {
+      const [x, y] = toScreen(m.lat, m.lon);
+      if (m.kind === "stop") { ctx.beginPath(); ctx.arc(x, y, 7, 0, 7); ctx.fillStyle = cssVar("--brand"); ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = cssVar("--surface"); ctx.stroke(); }
+      else if (m.kind === "me") { ctx.beginPath(); ctx.arc(x, y, 18, 0, 7); ctx.fillStyle = "rgba(66,133,244,.18)"; ctx.fill(); ctx.beginPath(); ctx.arc(x, y, 7, 0, 7); ctx.fillStyle = "#1A73E8"; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = "#fff"; ctx.stroke(); }
+      else { // from / to
+        ctx.beginPath(); ctx.arc(x, y, 9, 0, 7); ctx.fillStyle = m.kind === "to" ? cssVar("--fg") : cssVar("--surface"); ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = m.kind === "to" ? cssVar("--surface") : cssVar("--brand"); ctx.stroke();
+      }
+      if (m.label && z >= 12) { ctx.font = "600 12px Inter, system-ui, sans-serif"; ctx.fillStyle = cssVar("--fg"); ctx.strokeStyle = cssVar("--map-bg"); ctx.lineWidth = 4; ctx.strokeText(m.label, x + 12, y + 4); ctx.fillText(m.label, x + 12, y + 4); }
+    }
+    // city label
+    const city = NET.cities.find(cc => hav([c.lat, c.lon], cc.center) < 25000);
+    if (city && z < 11.6) { const [x, y] = toScreen(...city.center); ctx.font = "800 16px Manrope, system-ui, sans-serif"; ctx.fillStyle = cssVar("--map-label"); ctx.fillText(city.name, x - 20, y); }
+  }
+  function fit(points, maxZ = 15.5) {
+    if (!points.length) return;
+    let a = 90, b = -90, cmin = 180, d = -180;
+    for (const [la, lo] of points) { a = Math.min(a, la); b = Math.max(b, la); cmin = Math.min(cmin, lo); d = Math.max(d, lo); }
+    const availW = W - 48, availH = H - pad.top - pad.bottom - 24;
+    let zz = maxZ;
+    for (; zz > 4; zz -= .1) { const [x1, y1] = px(b, cmin, zz), [x2, y2] = px(a, d, zz); if (x2 - x1 <= availW && y2 - y1 <= availH) break; }
+    z = zz; c = { lat: (a + b) / 2, lon: (cmin + d) / 2 }; draw();
+  }
+  // interaction
+  const ptrs = new Map(); let last = null, pinch = null;
+  cv.addEventListener("pointerdown", e => { cv.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, [e.clientX, e.clientY]); last = [e.clientX, e.clientY]; if (ptrs.size === 2) { const [p, q] = [...ptrs.values()]; pinch = { d: Math.hypot(p[0] - q[0], p[1] - q[1]), z }; } downAt = [e.clientX, e.clientY, Date.now()]; });
+  let downAt = null;
+  cv.addEventListener("pointermove", e => {
+    if (!ptrs.has(e.pointerId)) return; ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+    if (ptrs.size === 2 && pinch) { const [p, q] = [...ptrs.values()]; z = Math.max(5, Math.min(17, pinch.z + Math.log2(Math.hypot(p[0] - q[0], p[1] - q[1]) / pinch.d))); draw(); return; }
+    const dx = e.clientX - last[0], dy = e.clientY - last[1]; last = [e.clientX, e.clientY];
+    const [cx, cy] = px(c.lat, c.lon); const [la, lo] = ll(cx - dx, cy - dy); c = { lat: la, lon: lo }; draw();
+  });
+  const up = e => { ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null;
+    if (downAt && Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) < 6 && Date.now() - downAt[2] < 400 && api.onTap) { const r = cv.getBoundingClientRect(); const [cx, cy] = px(c.lat, c.lon); const sx = e.clientX - r.left, sy = e.clientY - r.top; api.onTap(ll(cx + sx - W / 2, cy + sy - (H - pad.bottom + pad.top) / 2)); }
+    downAt = null; };
+  cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+  cv.addEventListener("wheel", e => { e.preventDefault(); z = Math.max(5, Math.min(17, z - e.deltaY * 0.0022)); draw(); }, { passive: false });
+  $("#zin").onclick = () => { z = Math.min(17, z + 1); draw(); };
+  $("#zout").onclick = () => { z = Math.max(5, z - 1); draw(); };
+  new ResizeObserver(resize).observe(cv);
+  const api = { draw, fit, layers, setPad(p) { pad = p; }, center(lat, lon, zz) { c = { lat, lon }; if (zz) z = zz; draw(); }, onTap: null };
+  return api;
+})();
+
+/* ---------------- sheet ---------------- */
+const sheet = $("#sheet"), grab = $("#grab");
+const SNAPS = [0.30, 0.58, 0.84]; let snap = 1;
+function setSnap(i) { snap = Math.max(0, Math.min(2, i)); const H = app.clientHeight; const vis = H * SNAPS[snap]; sheet.style.transform = `translateY(${sheet.clientHeight - vis}px)`; map.setPad({ top: 110, bottom: Math.min(vis, H * 0.6) }); }
+(() => { let y0 = null, t0 = 0, base = 0;
+  grab.addEventListener("pointerdown", e => { grab.setPointerCapture(e.pointerId); y0 = e.clientY; base = new DOMMatrix(getComputedStyle(sheet).transform).m42; sheet.classList.add("dragging"); });
+  grab.addEventListener("pointermove", e => { if (y0 == null) return; const ty = Math.max(0, base + e.clientY - y0); sheet.style.transform = `translateY(${ty}px)`; });
+  const end = e => { if (y0 == null) return; sheet.classList.remove("dragging"); const ty = new DOMMatrix(getComputedStyle(sheet).transform).m42; const vis = (sheet.clientHeight - ty) / app.clientHeight; let bi = 0, bd = 9; SNAPS.forEach((s, i) => { const d = Math.abs(s - vis); if (d < bd) { bd = d; bi = i; } }); if (Math.abs(e.clientY - y0) < 4) bi = (snap + 1) % 3; y0 = null; setSnap(bi); };
+  grab.addEventListener("pointerup", end); grab.addEventListener("pointercancel", end);
+  grab.addEventListener("keydown", e => { if (e.key === "ArrowUp") setSnap(snap + 1); if (e.key === "ArrowDown") setSnap(snap - 1); if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSnap((snap + 1) % 3); } });
+  new ResizeObserver(() => setSnap(snap)).observe(app);
+})();
+
+/* ---------------- connectivity / strike ---------------- */
+const isOffline = () => S.simOffline || !navigator.onLine;
+addEventListener("online", renderChrome); addEventListener("offline", renderChrome);
+const CAPTURED = new Date(LIVE.captured);
+function strikeInfo() {
+  for (const area of Object.values(LIVE.stops)) for (const s of area) for (const tm of s.times) for (const a of tm.alerts) if (a.cause === "STRIKE" && a.start) return a;
+  return null;
+}
+function renderChrome() {
+  $("#netBadge").innerHTML = isOffline()
+    ? `<span class="badge off" role="status"><span class="dot"></span>${t("offline")}</span>`
+    : `<span class="badge live" role="status"><span class="dot"></span>Transitous · ${t("live")}</span>`;
+  const st = strikeInfo(); let html = "";
+  if (st && !S.strikeDismissed) {
+    const day = new Date(st.start), now = new Date();
+    const dk = d => { const p = romeParts(d); return p.y * 10000 + p.mo * 100 + p.d; };
+    const diff = (romeToDate(...(() => { const p = romeParts(day); return [p.y, p.mo, p.d, 12, 0]; })()) - romeToDate(...(() => { const p = romeParts(now); return [p.y, p.mo, p.d, 12, 0]; })())) / 864e5;
+    if (diff >= 0 && diff <= 7) {
+      const msg = dk(day) === dk(now) ? t("strike_today") : t("strike_soon", { d: fmtDay(day) });
+      html = `<div class="strike" role="alert">${I.warn}<div><b>${esc(msg)}</b><br>${esc(st.h)} · <a href="https://scioperi.mit.gov.it/mit2/public/scioperi" target="_blank" rel="noopener">${t("strike_cal")}</a></div><button aria-label="Close" data-act="dismiss-strike">×</button></div>`;
+    }
+  }
+  $("#strikeSlot").innerHTML = html;
+  const tabs = [["plan", I.route], ["nearby", I.near], ["lines", I.lines], ["saved", I.star], ["more", I.more]];
+  $("#nav").innerHTML = tabs.map(([k, ic]) => `<button data-tab="${k}" ${S.tab === k ? 'aria-current="page"' : ""}><i>${ic}</i>${t(k)}</button>`).join("");
+}
+
+/* ---------------- search / suggestions ---------------- */
+const placeIndex = [];
+for (const [sid, st] of Object.entries(stations)) {
+  const ls = st.lines.map(id => lineById[id]);
+  if (!ls.some(l => l.mode !== "tram") && ls.length < 2) continue; // keep tram-only stops searchable only if interchange
+  placeIndex.push({ kind: "station", sid, name: st.name, lat: st.lat, lon: st.lon, city: cityById[cityOf(sid)].name, lines: st.lines, src: "GTFS" });
+}
+const tramStops = [];
+for (const [sid, st] of Object.entries(stations)) if (!placeIndex.some(p => p.sid === sid)) tramStops.push({ kind: "station", sid, name: st.name, lat: st.lat, lon: st.lon, city: cityById[cityOf(sid)].name, lines: st.lines, src: "GTFS" });
+for (const [k, [name, lat, lon]] of Object.entries(LIVE.places)) placeIndex.push({ kind: "place", key: k, name, lat, lon, city: "", src: "Transitous" });
+for (const res of Object.values(LIVE.geocode)) for (const r of res) if (!placeIndex.some(p => p.name.toLowerCase() === r.name.toLowerCase() && Math.abs(p.lat - r.lat) < .003)) placeIndex.push({ kind: r.type === "STOP" ? "stop" : "address", name: titleish(r.name), lat: r.lat, lon: r.lon, city: r.area, src: "Transitous" });
+function titleish(n) { const tc = n === n.toUpperCase() ? n.toLowerCase().replace(/(^|[\s(/'-])\p{L}/gu, m => m.toUpperCase()) : n; return tc.replace(/\(([A-Za-z]{2}(?:\s?-\s?[A-Za-z]{2})*)\)/g, (m, g) => "(" + g.toUpperCase() + ")"); }
+const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+function suggest(q) {
+  q = norm(q.trim()); if (!q) return [];
+  const score = p => { const n = norm(p.name); if (n === q) return 0; if (n.startsWith(q)) return 1; if (n.split(/[\s/–-]+/).some(w => w.startsWith(q))) return 2; if (n.includes(q)) return 3; if (norm(p.city).startsWith(q)) return 4; return 9; };
+  const all = placeIndex.concat(q.length > 2 ? tramStops : []);
+  return all.map(p => [score(p), p]).filter(x => x[0] < 9).sort((a, b) => a[0] - b[0] || (a[1].kind === "place" ? -1 : 0) || a[1].name.length - b[1].name.length).slice(0, 8).map(x => x[1]);
+}
+function livePairKey(from, to) {
+  const keyFor = p => { if (p.key) return p.key; for (const [k, [, la, lo]] of Object.entries(LIVE.places)) if (hav([p.lat, p.lon], [la, lo]) < 450) return k; return null; };
+  const a = keyFor(from), b = keyFor(to); if (!a || !b) return null;
+  return LIVE.plans[a + ">" + b] ? a + ">" + b : null;
+}
+
+/* ---------------- polyline ---------------- */
+function decode(str, prec = 6) {
+  const f = 10 ** prec; let i = 0, lat = 0, lon = 0; const out = [];
+  while (i < str.length) { for (const which of [0, 1]) { let r = 0, s = 0, b; do { b = str.charCodeAt(i++) - 63; r |= (b & 31) << s; s += 5; } while (b >= 32); const d = r & 1 ? ~(r >> 1) : r >> 1; if (which) lon += d; else lat += d; } out.push([lat / f, lon / f]); }
+  return out;
+}
+
+/* ---------------- rendering ---------------- */
+const body = $("#body");
+function go(tab, view = null, params = {}) { S.tab = tab; S.view = view; S.params = params; render(); }
+function render() {
+  renderChrome();
+  map.layers.journey = null; map.layers.focusLines = null; map.layers.markers = []; map.layers.stationsOf = null; map.onTap = null;
+  const v = { plan: renderPlan, nearby: renderNearby, lines: renderLines, saved: renderSaved, more: renderMore }[S.tab];
+  body.innerHTML = ""; const el = document.createElement("div"); el.className = "fade-in"; body.appendChild(el); v(el);
+  map.draw();
+}
+const backBtn = (act) => `<button class="back" data-act="${act}">${I.back}${t("back")}</button>`;
+
+/* --- plan --- */
+function placeLabel(p) { return p ? p.name : ""; }
+function renderPlan(el) {
+  if (S.view === "results") return renderResults(el);
+  if (S.view === "detail") return renderDetail(el);
+  const q = S.focus ? ($("#" + S.focus)?.value ?? "") : "";
+  el.innerHTML = `
+    <h2 class="title">${t("plan")}</h2>
+    <div class="planner" role="group" aria-label="${t("plan")}">
+      <label class="field"><span class="pin" aria-hidden="true"></span><span class="visually-hidden" hidden>${t("from")}</span>
+        <input id="fromIn" autocomplete="off" placeholder="${t("choose_start")}" aria-label="${t("from")}" value="${esc(placeLabel(S.from))}"></label>
+      <label class="field"><span class="pin to" aria-hidden="true"></span>
+        <input id="toIn" autocomplete="off" placeholder="${t("choose_dest")}" aria-label="${t("to")}" value="${esc(placeLabel(S.to))}"></label>
+      <button class="swap" data-act="swap" aria-label="${t("swap")}">${I.swap}</button>
+    </div>
+    <div id="sugg"></div>
+    <div id="planRest">
+      <div class="chips" role="group">
+        <button class="chip" data-act="myloc">${I.near}${t("my_location")}</button>
+        <button class="chip" data-act="pickmap">${I.map}${t("pick_map")}</button>
+        ${S.home ? `<button class="chip" data-act="use-home">${I.home}${t("home")}</button>` : ""}
+        ${S.work ? `<button class="chip" data-act="use-work">${I.work}${t("work")}</button>` : ""}
+      </div>
+      <div class="seg" role="group" aria-label="Time" style="margin-top:12px">
+        ${["now", "depart", "arrive"].map(m => `<button data-time="${m}" aria-pressed="${S.timeMode === m}">${t(m === "now" ? "now" : m === "depart" ? "depart_at" : "arrive_by")}</button>`).join("")}
+      </div>
+      ${S.timeMode !== "now" ? `<div style="margin-top:8px"><input class="timein tnum" id="timeIn" type="datetime-local" value="${S.timeVal || defaultTimeVal()}" aria-label="${t("depart_at")}"></div>` : ""}
+      <div class="seg" role="group" aria-label="Preference" style="margin-top:8px">
+        <button data-pref="fastest" aria-pressed="${S.pref === "fastest"}">${t("fastest")}</button>
+        <button data-pref="fewest" aria-pressed="${S.pref === "fewest"}">${t("fewest")}</button>
+      </div>
+      <button class="btn" data-act="search" style="width:100%;margin-top:14px">${t("search")}</button>
+      <h3 class="sub">${t("try_these")}</h3>
+      <div class="list">${Object.keys(LIVE.plans).map(k => { const [a, b] = k.split(">"); const it = LIVE.plans[k][0]; return `<button class="card" data-act="preset" data-k="${k}" style="padding:12px 14px"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><span style="min-width:0"><b>${esc(LIVE.places[a][0])}</b> → <b>${esc(LIVE.places[b][0])}</b></span><span class="muted small tnum" style="flex:none">${it ? fmtDur(it.dur) : ""}</span></div><div class="res-legs" style="margin-top:6px">${it ? legChips(it.legs) : ""}</div></button>`; }).join("")}</div>
+      ${S.recents.length ? `<h3 class="sub">${t("recent")}</h3><div class="list">${S.recents.slice(0, 4).map((r, i) => `<button class="line-row" data-act="recent" data-i="${i}">${I.clock}<span class="t">${esc(r.from.name)} → ${esc(r.to.name)}</span></button>`).join("")}</div>` : ""}
+    </div>`;
+  const markers = []; if (S.from) markers.push({ ...S.from, kind: "from", label: S.from.name }); if (S.to) markers.push({ ...S.to, kind: "to", label: S.to.name });
+  map.layers.markers = markers;
+  if (S.from && S.to) map.fit([[S.from.lat, S.from.lon], [S.to.lat, S.to.lon]], 15);
+  for (const id of ["fromIn", "toIn"]) {
+    const inp = $("#" + id);
+    inp.addEventListener("focus", () => { S.focus = id; setSnap(2); showSugg(inp.value); });
+    inp.addEventListener("input", () => showSugg(inp.value));
+    inp.addEventListener("keydown", e => { if (e.key === "Enter") { const first = $("#sugg button"); first?.click(); } if (e.key === "Escape") inp.blur(); });
+  }
+  if (S.focus) { const inp = $("#" + S.focus); inp.focus(); inp.setSelectionRange(q.length, q.length); }
+}
+function showSugg(q) {
+  const box = $("#sugg"), rest = $("#planRest");
+  const res = suggest(q);
+  if (!q.trim()) { box.innerHTML = ""; rest.hidden = false; return; }
+  rest.hidden = true;
+  box.innerHTML = res.length ? `<ul class="suggest" role="listbox">${res.map((p, i) => `<li><button role="option" data-act="pick" data-i="${i}"><span class="ic">${p.kind === "station" ? modeIcon(lineById[p.lines[0]].mode) : p.kind === "stop" ? I.bus : I.pin}</span><span style="min-width:0"><span class="t">${esc(p.name)}</span><span class="s">${p.city ? esc(p.city) + " · " : ""}${p.kind === "station" ? p.lines.slice(0, 6).map(id => chip(lineName(lineById[id]), lineById[id].color, lineById[id].mode, true)).join("") : t(p.kind === "stop" ? "stop" : p.kind === "place" ? "place" : "address")} <span class="src">${p.src}</span></span></span></button></li>`).join("")}</ul>`
+    : `<div class="empty"><b>${t("no_routes")}</b></div>`;
+  box._res = res;
+}
+function defaultTimeVal() { const p = romeParts(new Date()); return `${p.y}-${String(p.mo).padStart(2, "0")}-${String(p.d).padStart(2, "0")}T${String(p.h).padStart(2, "0")}:${String(p.mi).padStart(2, "0")}`; }
+function legChips(legs) {
+  return legs.map((l, i) => {
+    const sep = i ? `<svg class="sep" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>` : "";
+    if (l.mode === "WALK" || l.kind === "walk") { const s = l.dur ?? l.s; return s >= 120 ? sep + `<span class="walk" aria-label="${t("walk")}">${I.walk}${Math.round(s / 60)}</span>` : ""; }
+    if (l.kind === "ride") { const L = lineById[l.line]; return sep + chip(lineName(L), L.color, L.mode); }
+    return sep + chip(liveName(l.name), l.color || "5B6770", liveMode(l.mode));
+  }).join("").replace(/^<svg class="sep"[^]*?<\/svg>/, "");
+}
+function delayBadge(sched, actual, rt, cancelled) {
+  if (cancelled) return `<span class="delay cx">${t("cancelled")}</span>`;
+  if (!rt) return "";
+  const m = Math.round((new Date(actual) - new Date(sched)) / 60000);
+  if (m >= 1) return `<span class="delay late">${t("late", { m: nf(m) })}</span>`;
+  if (m <= -1) return `<span class="delay ontime">${t("early", { m: nf(-m) })}</span>`;
+  return `<span class="delay ontime">${t("on_time")}</span>`;
+}
+function doSearch() {
+  if (!S.from || !S.to) { toast(t("pick_both")); return; }
+  S.recents = [{ from: S.from, to: S.to }, ...S.recents.filter(r => !(r.from.name === S.from.name && r.to.name === S.to.name))].slice(0, 8); store.set("recents", S.recents);
+  S.focus = null;
+  body.innerHTML = `<div class="list" aria-busy="true" aria-label="${t("loading")}"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>`;
+  setTimeout(() => go("plan", "results"), 450);
+}
+function currentDepSec() {
+  let d = new Date();
+  if (S.timeMode !== "now" && S.timeVal) { const [ds, ts] = S.timeVal.split("T"); const [y, mo, dd] = ds.split("-").map(Number); const [h, mi] = ts.split(":").map(Number); d = romeToDate(y, mo, dd, h, mi); }
+  const p = romeParts(d); return { sec: p.h * 3600 + p.mi * 60, date: d };
+}
+function renderResults(el) {
+  const key = !isOffline() && livePairKey(S.from, S.to);
+  let html = `${backBtn("to-plan")}<h2 class="title">${esc(S.from.name)} → ${esc(S.to.name)}</h2>`;
+  if (key) {
+    const its = LIVE.plans[key];
+    html += `<div class="snap">${I.clock}${t("snapshot", { t: fmtDayTime(CAPTURED) })}</div><div class="list">` + its.map((it, i) => {
+      const firstT = it.legs.find(l => l.mode !== "WALK"); const delays = it.legs.filter(l => l.mode !== "WALK").map(l => delayBadge(l.sStart, l.start, l.rt, l.cancelled)).filter(Boolean);
+      const walk = it.legs.filter(l => l.mode === "WALK").reduce((a, l) => a + l.dist, 0);
+      return `<button class="card" data-act="live-detail" data-i="${i}"><div class="res-top"><span class="res-time tnum">${fmtTime(new Date(it.start))} – ${fmtTime(new Date(it.end))}</span><span class="res-dur tnum">${fmtDur(it.dur)}</span></div>
+        <div class="res-legs">${legChips(it.legs)}</div>
+        <div class="res-meta"><span>${t("changes", it.transfers)}</span>${walk ? `<span>· ${t("total_walk", { d: fmtDist(walk) })}</span>` : ""}${firstT ? `<span>· ${t("depart")} ${esc(titleish(firstT.from.name))}${firstT.from.track ? ` · ${t("platform")} ${esc(firstT.from.track)}` : ""}</span>` : ""}${delays[0] || ""}</div></button>`;
+    }).join("") + `</div>`;
+    map.layers.markers = [{ ...S.from, kind: "from" }, { ...S.to, kind: "to" }];
+    const it = its[0]; drawLiveJourney(it);
+  } else {
+    const { sec } = currentDepSec();
+    const r = offlinePlans(S.from, S.to, sec);
+    if (isOffline()) html += `<div class="alert" role="status">${I.off}<span>${t("offline_note")}</span></div>`;
+    else html += `<div class="snap">${I.map}${t("est")}</div>`;
+    if (r.error) {
+      html += `<div class="empty">${I.route}<b>${t("no_routes")}</b><span>${r.error === "city" ? t("same_city") : t("no_routes_s")}</span><div style="margin-top:12px"><button class="btn tonal" data-act="to-plan">${t("retry")}</button></div></div>`;
+    } else {
+      S._offline = r;
+      html += `<div class="list" style="margin-top:8px">` + r.map((o, i) => `<button class="card" data-act="off-detail" data-i="${i}">
+        <div class="tag">${t(o.pref === "fewest" ? "fewest" : "fastest")}</div>
+        <div class="res-top"><span class="res-time tnum">≈ ${secOfDay(o.dep)} – ${secOfDay(o.arr)}</span><span class="res-dur tnum">${fmtDur(o.dur)}</span></div>
+        <div class="res-legs">${legChips(o.legs)}</div>
+        <div class="res-meta"><span>${t("changes", o.transfers)}</span>${o.walk ? `<span>· ${t("total_walk", { d: fmtDist(o.walk) })}</span>` : ""}<span class="delay" style="background:var(--surface-3);color:var(--fg-2)">${t("estimated")}</span></div></button>`).join("") + `</div>`;
+      drawOfflineJourney(r[0]);
+    }
+    map.layers.markers = [{ ...S.from, kind: "from" }, { ...S.to, kind: "to" }];
+  }
+  el.innerHTML = html;
+}
+function drawLiveJourney(it) {
+  const segs = [], pts = [];
+  for (const l of it.legs) { const p = l.geom ? decode(l.geom, l.prec || 6) : [[l.from.lat, l.from.lon], [l.to.lat, l.to.lon]]; segs.push({ pts: p, walk: l.mode === "WALK", color: (l.color || "5B6770").toUpperCase() }); pts.push(...p); }
+  map.layers.journey = segs; map.fit(pts, 16);
+}
+function offPts(l) {
+  if (l.kind === "walk") { const a = l.from ? stations[l.from] : S.from, b = l.to ? stations[l.to] : S.to; return [[a.lat, a.lon], [b.lat, b.lon]]; }
+  return [l.from, ...l.stops].map(s => [stations[s].lat, stations[s].lon]);
+}
+function drawOfflineJourney(o) {
+  const segs = o.legs.map(l => ({ pts: offPts(l), walk: l.kind === "walk", color: l.kind === "ride" ? lineById[l.line].color : "" }));
+  map.layers.journey = segs; map.fit(segs.flatMap(s => s.pts), 16);
+}
+function renderDetail(el) {
+  const { live, i } = S.params;
+  let html = `${backBtn("to-results")}<h2 class="title">${t("details")}</h2>`;
+  const rows = [];
+  const row = (time, sched, railCls, color, nodeHtml, bodyHtml) => rows.push(`<div class="tl-row"><div class="tl-time tnum">${time}${sched ? `<s>${sched}</s>` : ""}</div><div class="tl-rail ${railCls}" style="--c:${color}">${nodeHtml}</div><div class="tl-body">${bodyHtml}</div></div>`);
+  if (live) {
+    const it = LIVE.plans[livePairKey(S.from, S.to)][i];
+    html += `<div class="snap">${I.clock}${t("snapshot", { t: fmtDayTime(CAPTURED) })}</div>`;
+    html += `<div class="res-top"><span class="res-time tnum">${fmtTime(new Date(it.start))} – ${fmtTime(new Date(it.end))}</span><span class="res-dur tnum">${fmtDur(it.dur)}</span></div><div class="res-meta" style="margin-bottom:12px">${t("changes", it.transfers)}</div>`;
+    it.legs.forEach((l, k) => {
+      const isWalk = l.mode === "WALK"; const c = isWalk ? "var(--fg-3)" : "#" + (l.color || "5B6770");
+      const st = new Date(l.start), sst = new Date(l.sStart);
+      const shifted = l.rt && Math.abs(st - sst) >= 60000;
+      const fromName = k === 0 ? S.from.name : titleish(l.from.name);
+      if (isWalk) {
+        row(fmtTime(st), "", "walk" + (k === 0 ? " first" : ""), c, `<span class="node" style="--c:var(--fg-3)"></span>`, `<div class="stn">${esc(fromName)}</div><div class="info">${I.walk.replace("<svg", '<svg width="16" height="16"')} ${t("walk_m", { d: fmtDist(l.dist) })} · ${fmtDur(l.dur)}</div>`);
+      } else {
+        const alerts = (l.alerts || []).slice(0, 1).map(a => `<div class="alert ${a.cause === "STRIKE" ? "strk" : ""}">${I.warn}<span><b>${esc(a.h)}</b></span></div>`).join("");
+        row(fmtTime(st), shifted ? fmtTime(sst) : "", k === 0 ? "first" : "", c, `<span class="node"></span>`,
+          `<div class="stn">${esc(fromName)}</div><div class="info">${chip(liveName(l.name), l.color, liveMode(l.mode))} <span>${t("towards")} ${esc(titleish(l.head || ""))}</span>${l.from.track ? `<span class="plat">${t("platform")} ${esc(l.from.track)}</span>` : ""}${delayBadge(l.sStart, l.start, l.rt, l.cancelled)}</div>
+           <div class="info">${esc(l.agency || "")} · ${fmtDur(l.dur)}</div>
+           ${l.stops.length ? `<details class="stops"><summary>${t("stops", l.stops.length + 1)} ▾</summary><ol>${l.stops.map(s => `<li>${esc(titleish(s))}</li>`).join("")}</ol></details>` : `<div class="info">${t("stops", 1)}</div>`}${alerts}`);
+      }
+    });
+    const lastL = it.legs[it.legs.length - 1];
+    row(fmtTime(new Date(it.end)), "", "last", "var(--fg)", `<span class="node" style="--c:var(--fg)"></span>`, `<div class="stn">${esc(S.to.name)}</div><div class="info">${t("arrive")}</div>`);
+    drawLiveJourney(it); void lastL;
+  } else {
+    const o = S._offline[i];
+    html += `<div class="snap">${I.map}${t("est")}</div><div class="res-top"><span class="res-time tnum">≈ ${secOfDay(o.dep)} – ${secOfDay(o.arr)}</span><span class="res-dur tnum">${fmtDur(o.dur)}</span></div><div class="res-meta" style="margin-bottom:12px">${t("changes", o.transfers)}${o.walk ? ` · ${t("total_walk", { d: fmtDist(o.walk) })}` : ""}</div>`;
+    let tcur = o.dep;
+    o.legs.forEach((l, k) => {
+      const fromName = l.from ? stations[l.from].name : S.from.name;
+      if (l.kind === "walk") { row(secOfDay(tcur), "", "walk" + (k === 0 ? " first" : ""), "var(--fg-3)", `<span class="node" style="--c:var(--fg-3)"></span>`, `<div class="stn">${esc(fromName)}</div><div class="info">${t("walk_m", { d: fmtDist(l.d) })} · ${fmtDur(l.s)}</div>`); tcur += l.s; }
+      else {
+        const L = lineById[l.line]; const term = (() => { for (const b of L.branches) { const a = b.indexOf(l.from), z = b.indexOf(l.to); if (a >= 0 && z >= 0) return stations[a < z ? b[b.length - 1] : b[0]].name; } return ""; })();
+        const hw = headwayAt(L, l.dep);
+        row(secOfDay(l.dep), "", k === 0 ? "first" : "", "#" + L.color, `<span class="node"></span>`, `<div class="stn">${esc(fromName)}</div><div class="info">${chip(lineName(L), L.color, L.mode)} <span>${t("towards")} ${esc(term)}</span>${hw ? `<span class="est">${t("every", { m: nf(Math.round(hw)) })}</span>` : ""}</div><div class="info">${esc(cityById[cityOf(L.id)].operator)} · ${fmtDur(l.s)}</div><details class="stops"><summary>${t("stops", l.stops.length)} ▾</summary><ol>${l.stops.map(s => `<li>${esc(stations[s].name)}</li>`).join("")}</ol></details>`);
+        tcur = l.arr;
+      }
+    });
+    row(secOfDay(o.arr), "", "last", "var(--fg)", `<span class="node" style="--c:var(--fg)"></span>`, `<div class="stn">${esc(S.to.name)}</div><div class="info">${t("arrive")}</div>`);
+    drawOfflineJourney(o);
+  }
+  map.layers.markers = [{ ...S.from, kind: "from" }, { ...S.to, kind: "to" }];
+  el.innerHTML = html + `<div class="tl">${rows.join("")}</div>`;
+}
+
+/* --- nearby --- */
+const AREAS = ["colosseo", "termini", "duomo", "mi_centrale", "na_centrale", "to_pn"];
+function renderNearby(el) {
+  const area = S.nearbyArea, P = LIVE.places[area];
+  const list = LIVE.stops[area] || [];
+  el.innerHTML = `<h2 class="title">${t("nearby_title")}</h2>
+    ${S.locDenied ? `<div class="alert" role="status">${I.near}<span>${t("loc_denied")}</span></div>` : ""}
+    <div class="chips" role="group" aria-label="${t("choose_area")}">${AREAS.map(a => `<button class="chip" data-area="${a}" aria-pressed="${a === area}">${esc(LIVE.places[a][0])}</button>`).join("")}</div>
+    <div class="snap">${I.clock}${t("snapshot", { t: fmtDayTime(CAPTURED) })} · ${t("within")}</div>
+    ${isOffline() ? nearbyOffline(P) : `<div class="list">${list.map(s => `<div class="stop-card"><div class="stop-head"><b>${esc(titleish(s.name.replace(/\s*#\s*\w+$/, "")))}</b><span class="muted small tnum">${fmtDist(s.distance)}</span></div>
+      ${s.times.length ? s.times.slice(0, 5).map(x => { const dep = new Date(x.dep), sd = new Date(x.sDep); const shifted = x.rt && Math.abs(dep - sd) >= 60000; return `<div class="dep ${x.cancelled ? "cancelled" : ""}">${chip(liveName(x.name), x.color || "5B6770", liveMode(x.mode))}<div class="hd">${esc(titleish(x.head || ""))}<small>${esc(x.agency || "")}${x.track ? ` · ${t("platform")} ${esc(x.track)}` : ""}</small></div><div class="tm tnum"><b>${fmtTime(dep)}</b>${shifted ? `<s>${fmtTime(sd)}</s>` : ""}${delayBadge(x.sDep, x.dep, x.rt, x.cancelled)}</div></div>`; }).join("") : `<div class="dep"><span></span><div class="hd muted">${t("no_service")}</div><span></span></div>`}</div>`).join("")}</div>`}`;
+  map.layers.markers = [{ lat: P[1], lon: P[2], kind: "me" }, ...list.map(s => ({ lat: s.lat, lon: s.lon, kind: "stop" }))];
+  map.fit([[P[1] - .0045, P[2] - .0045], [P[1] + .0045, P[2] + .0045]], 16);
+}
+function nearbyOffline(P) {
+  const near = Object.entries(stations).map(([sid, st]) => ({ sid, st, d: hav([P[1], P[2]], [st.lat, st.lon]) })).filter(x => x.d < 600).sort((a, b) => a.d - b.d).slice(0, 6);
+  const { sec } = currentDepSec();
+  return `<div class="alert" role="status">${I.off}<span>${t("offline_note")}</span></div><div class="list" style="margin-top:8px">${near.map(({ sid, st, d }) => `<div class="stop-card"><div class="stop-head"><b>${esc(st.name)}</b><span class="muted small">${fmtDist(d)}</span></div>${st.lines.map(id => { const L = lineById[id], hw = headwayAt(L, sec); return `<div class="dep">${chip(lineName(L), L.color, L.mode)}<div class="hd">${esc(lineTermini(L))}</div><div class="tm small">${hw ? t("every", { m: nf(Math.round(hw)) }) : t("no_service")}</div></div>`; }).join("")}</div>`).join("")}</div>`;
+}
+
+/* --- lines --- */
+function renderLines(el) {
+  if (S.view === "line") return renderLine(el);
+  if (S.view === "station") return renderStation(el);
+  const city = S.linesCity;
+  const ls = NET.lines.filter(l => cityOf(l.id) === city);
+  const groups = ["metro", "rail", "tram", "funicular"].map(m => [m, ls.filter(l => l.mode === m)]).filter(g => g[1].length);
+  el.innerHTML = `<h2 class="title">${t("lines_title")}</h2>
+    <div class="chips" role="group">${NET.cities.map(c => `<button class="chip" data-city="${c.id}" aria-pressed="${c.id === city}">${esc(c.name)}</button>`).join("")}</div>
+    <p class="muted small" style="margin:8px 0 0">${esc(cityById[city].operator)} · ${t("net_stats", { l: nf(ls.length), s: nf(new Set(ls.flatMap(l => l.branches.flat())).size) })}</p>
+    ${groups.map(([m, arr]) => `<h3 class="sub">${t(m)}</h3>${arr.map(l => `<button class="line-row" data-line="${l.id}">${chip(lineName(l), l.color, l.mode)}<span style="min-width:0;flex:1"><span class="t" style="display:block">${esc(lineTermini(l))}</span><span class="s">${t("stops", new Set(l.branches.flat()).size)}${l.headways[2] ? ` · ${t("every", { m: nf(Math.round(l.headways[2])) })}` : ""}</span></span>${I.chev.replace("<svg", '<svg width="20" height="20"')}</button>`).join("")}`).join("")}`;
+  map.layers.focusLines = null;
+  const pts = ls.filter(l => l.mode !== "tram").flatMap(l => l.branches.flat().map(s => [stations[s].lat, stations[s].lon]));
+  map.fit(pts.length ? pts : ls.flatMap(l => l.branches.flat().map(s => [stations[s].lat, stations[s].lon])), 14);
+}
+function renderLine(el) {
+  const L = lineById[S.params.id], bi = S.params.branch || 0, br = L.branches[bi];
+  const maxHw = Math.max(...L.headways.filter(Boolean), 1);
+  const bands = NET.timeBands.map(([a, b]) => `${String(a).padStart(2, "0")}–${String(b).padStart(2, "0")}`);
+  el.innerHTML = `${backBtn("to-lines")}
+    <div class="row" style="gap:12px;margin:4px 0 4px">${chip(lineName(L), L.color, L.mode)}<h2 class="title" style="margin:0;font-size:19px;flex:1;min-width:0">${esc(lineTermini(L))}</h2></div>
+    <p class="muted small" style="margin:0 0 12px">${esc(cityById[cityOf(L.id)].operator)} · ${t(L.mode)}</p>
+    <div class="kv"><div><b class="tnum">${L.firstDep != null ? secOfDay(L.firstDep) : "–"}</b><span>${t("first")}</span></div><div><b class="tnum">${L.lastDep != null ? secOfDay(L.lastDep) : "–"}</b><span>${t("last")}</span></div><div><b class="tnum">${nf(new Set(L.branches.flat()).size)}</b><span>${t("stations")}</span></div></div>
+    <h3 class="sub">${t("frequency")}</h3>
+    <div class="bars" style="--c:#${L.color}" role="img" aria-label="${t("frequency")}">${L.headways.map((h, i) => `<div><b class="tnum">${h ? nf(Math.round(h)) + "′" : "–"}</b><span class="b" style="height:${h ? Math.max(8, (1 - (h - 1) / (maxHw + 2)) * 60 + 8) : 3}px;${h ? "" : "background:var(--surface-3)"}"></span><span class="tnum">${bands[i]}</span></div>`).join("")}</div>
+    <p class="est" style="margin:4px 0 0">${t("ref_day", { d: new Intl.DateTimeFormat(locale(), { dateStyle: "medium", timeZone: "UTC" }).format(new Date(cityById[cityOf(L.id)].source.referenceDay)) })}</p>
+    ${L.branches.length > 1 ? `<h3 class="sub">${t("branch")}</h3><div class="chips">${L.branches.map((b, k) => `<button class="chip" data-branch="${k}" aria-pressed="${k === bi}">${esc(stations[b[b.length - 1]].name)}</button>`).join("")}</div>` : ""}
+    <h3 class="sub">${t("stations")}</h3>
+    <ol class="diagram" style="--c:#${L.color}">${br.map(sid => { const st = stations[sid]; const others = new Set(st.lines.filter(x => x !== L.id)); for (const tr of transfersAt[sid] || []) for (const x of stations[tr.to].lines) if (x !== L.id) others.add(x); const ox = [...others].map(x => lineById[x]).filter(x => x.mode !== "tram" || L.mode === "tram").slice(0, 6);
+      return `<li><span class="rail"><i class="${ox.length ? "x" : ""}"></i></span><button data-station="${sid}"><span style="font-weight:${ox.length ? 700 : 500}">${esc(st.name)}</span>${ox.length ? `<span class="xs">${ox.map(x => chip(lineName(x), x.color, x.mode, true)).join("")}</span>` : ""}</button></li>`; }).join("")}</ol>`;
+  map.layers.focusLines = [L.id]; map.layers.stationsOf = br;
+  map.fit(br.map(s => [stations[s].lat, stations[s].lon]), 15);
+}
+function renderStation(el) {
+  const sid = S.params.sid, st = stations[sid];
+  const { sec } = currentDepSec();
+  const dirs = [];
+  for (const id of st.lines) { const L = lineById[id]; const hw = headwayAt(L, sec); const ends = new Set(); for (const b of L.branches) { const i = b.indexOf(sid); if (i < 0) continue; if (i < b.length - 1) ends.add(b[b.length - 1]); if (i > 0) ends.add(b[0]); } for (const e of ends) dirs.push({ L, to: stations[e].name, hw }); }
+  const xs = (transfersAt[sid] || []).map(tr => ({ ...tr, st: stations[tr.to] }));
+  el.innerHTML = `${backBtn("to-line")}<h2 class="title">${esc(st.name)}</h2>
+    <p class="muted small" style="margin:-6px 0 8px">${t("station")} · ${esc(cityById[cityOf(sid)].name)}</p>
+    <div class="row">${st.lines.map(id => `<button class="iconbtn" style="min-width:auto;padding:0 2px" data-line="${id}" aria-label="${esc(lineName(lineById[id]))}">${chip(lineName(lineById[id]), lineById[id].color, lineById[id].mode)}</button>`).join("")}</div>
+    <h3 class="sub">${t("next_dep")}</h3>
+    <div class="stop-card">${dirs.map(d => `<div class="dep">${chip(lineName(d.L), d.L.color, d.L.mode)}<div class="hd">${t("towards")} ${esc(d.to)}<small>${t("est")}</small></div><div class="tm small">${d.hw ? t("every", { m: nf(Math.round(d.hw)) }) : t("no_service")}</div></div>`).join("")}</div>
+    ${xs.length ? `<h3 class="sub">${t("interchange")}</h3><div class="list">${xs.map(x => `<button class="line-row" data-station="${x.to}"><span class="row" style="gap:4px">${x.st.lines.slice(0, 4).map(id => chip(lineName(lineById[id]), lineById[id].color, lineById[id].mode, true)).join("")}</span><span style="flex:1;min-width:0"><span class="t" style="display:block">${esc(x.st.name)}</span><span class="s">${t("walk_to", { t: nf(Math.max(1, Math.round(x.w / 60))) })} · ${fmtDist(x.d)}</span></span></button>`).join("")}</div>` : ""}
+    <div class="row" style="margin-top:16px"><button class="btn tonal" data-act="st-from">${t("from")}: ${esc(st.name)}</button><button class="btn tonal" data-act="st-to">${t("to")}: ${esc(st.name)}</button></div>`;
+  map.layers.focusLines = st.lines; map.layers.markers = [{ lat: st.lat, lon: st.lon, kind: "stop", label: st.name }];
+  map.center(st.lat, st.lon, 15);
+}
+
+/* --- saved --- */
+function renderSaved(el) {
+  const slot = (k, ic) => { const p = S[k]; return `<div class="set"><span class="ic" style="width:40px;height:40px;border-radius:50%;background:var(--brand-soft);color:var(--on-brand-soft);display:grid;place-items:center">${ic.replace("<svg", '<svg width="20" height="20"')}</span><span class="t"><b>${t(k)}</b><small>${p ? esc(p.name) : t("set_from_search")}</small></span>${p ? `<button class="btn text" data-act="go-${k}">${t("to")}</button>` : ""}</div>`; };
+  el.innerHTML = `<h2 class="title">${t("saved_title")}</h2>${slot("home", I.home)}${slot("work", I.work)}
+    ${S.to ? `<div class="row" style="margin-top:12px"><span class="muted small">${t("save_as")}: <b>${esc(S.to.name)}</b></span><button class="chip" data-act="save-home">${I.home}${t("home")}</button><button class="chip" data-act="save-work">${I.work}${t("work")}</button></div>` : ""}
+    <h3 class="sub">${t("recent")}</h3>
+    ${S.recents.length ? `<div class="list">${S.recents.map((r, i) => `<button class="line-row" data-act="recent" data-i="${i}">${I.clock.replace("<svg", '<svg width="20" height="20"')}<span class="t">${esc(r.from.name)} → ${esc(r.to.name)}</span></button>`).join("")}</div>` : `<div class="empty">${I.clock}<b>${t("recent")}</b>${t("no_recent")}</div>`}`;
+}
+
+/* --- more / settings --- */
+function renderMore(el) {
+  if (S.view === "privacy") return renderPrivacy(el);
+  if (S.view === "attr") return renderAttr(el);
+  const opt = (name, cur, list) => `<div class="seg" role="group" aria-label="${t(name)}" style="flex:none">${list.map(([v, l]) => `<button data-set="${name}" data-v="${v}" aria-pressed="${cur === v}">${l}</button>`).join("")}</div>`;
+  el.innerHTML = `<h2 class="title">${t("settings")}</h2>
+    <div class="set" style="flex-wrap:wrap"><span class="t"><b>${t("language")}</b></span>${opt("language", S.langPref, [["system", t("system")], ["en", "English"], ["it", "Italiano"]])}</div>
+    <div class="set" style="flex-wrap:wrap"><span class="t"><b>${t("theme")}</b></span>${opt("theme", S.themePref, [["system", t("system")], ["light", t("light")], ["dark", t("dark")]])}</div>
+    <label class="set"><span class="t"><b>${t("crash")}</b><small>${t("crash_s")}</small></span><span class="switch"><input type="checkbox" id="crashSw" ${S.crash ? "checked" : ""}><span></span></span></label>
+    <label class="set"><span class="t"><b>${t("sim_off")}</b><small>${t("sim_off_s")}</small></span><span class="switch"><input type="checkbox" id="offSw" ${S.simOffline ? "checked" : ""}><span></span></span></label>
+    <a class="linkrow" href="https://scioperi.mit.gov.it/mit2/public/scioperi" target="_blank" rel="noopener">${I.warn}<span style="flex:1"><b>${t("strikes")}</b><br><span class="muted small">scioperi.mit.gov.it</span></span>${I.ext}</a>
+    <button class="linkrow" data-act="privacy"><span style="flex:1"><b>${t("privacy")}</b></span>${I.chev}</button>
+    <button class="linkrow" data-act="attr"><span style="flex:1"><b>${t("attributions")}</b></span>${I.chev}</button>
+    <p class="muted small" style="margin-top:16px">ItaliaNow 0.1.0 · MIT License · ${t("data_from")}: ${t("net_stats", { l: nf(NET.lines.length), s: nf(Object.keys(stations).length) })}</p>`;
+  $("#crashSw").onchange = e => { S.crash = e.target.checked; store.set("crash", S.crash); };
+  $("#offSw").onchange = e => { S.simOffline = e.target.checked; store.set("simOffline", S.simOffline); renderChrome(); };
+}
+function renderPrivacy(el) {
+  const it = lang() === "it";
+  el.innerHTML = `${backBtn("to-more")}<h2 class="title">${t("privacy")}</h2><div class="prose">${it ? `
+    <p>ItaliaNow non usa tracciamento, pubblicità né profilazione. Questa informativa segue il Regolamento (UE) 2016/679 (GDPR).</p>
+    <h4>Dati sul dispositivo</h4><p>Luoghi preferiti, ricerche recenti e impostazioni restano solo sul tuo dispositivo. Puoi cancellarli in qualsiasi momento.</p>
+    <h4>Posizione</h4><p>La posizione viene letta solo se la consenti e solo quando cerchi fermate vicine o un percorso. Viene inviata esclusivamente nella richiesta di percorso al server di calcolo (Transitous) e mai salvata.</p>
+    <h4>Servizi esterni</h4><p>Le ricerche di percorsi, fermate e indirizzi vengono inviate a Transitous (api.transitous.org). Le mappe vengono scaricate dal fornitore di tessere. Nessuno dei due riceve un identificativo personale.</p>
+    <h4>Segnalazioni di arresto</h4><p>Disattivate per impostazione predefinita. Se le attivi, rapporti tecnici anonimi vengono inviati a Sentry (UE). Base giuridica: consenso (art. 6.1.a), revocabile nelle Impostazioni.</p>
+    <h4>I tuoi diritti</h4><p>Accesso, rettifica, cancellazione, opposizione e reclamo al Garante per la protezione dei dati personali.</p>`
+  : `<p>ItaliaNow has no tracking, ads or profiling. This policy follows the EU General Data Protection Regulation (GDPR).</p>
+    <h4>Data on your device</h4><p>Favourite places, recent searches and settings stay on your device only. You can delete them at any time.</p>
+    <h4>Location</h4><p>Your location is read only if you allow it, and only when you look for nearby stops or plan a route. It is sent only inside the route request to the routing server (Transitous) and is never stored.</p>
+    <h4>Outside services</h4><p>Route, stop and address searches go to Transitous (api.transitous.org). Map tiles come from the tile provider. Neither receives a personal identifier.</p>
+    <h4>Crash reports</h4><p>Off by default. If you turn them on, anonymous technical reports go to Sentry (EU region). Legal basis: consent (Art. 6(1)(a)), which you can withdraw in Settings.</p>
+    <h4>Your rights</h4><p>Access, correction, deletion, objection, and complaint to your data protection authority (in Italy, the Garante per la protezione dei dati personali).</p>`}</div>`;
+}
+function renderAttr(el) {
+  el.innerHTML = `${backBtn("to-more")}<h2 class="title">${t("attributions")}</h2>
+    <div class="attr"><b>Transitous</b>${lang() === "it" ? "Calcolo percorsi, ricerca e tempo reale. Servizio comunitario basato su MOTIS." : "Journey planning, search and real time. A community service built on MOTIS."} <a href="https://transitous.org" target="_blank" rel="noopener">transitous.org</a></div>
+    <div class="attr"><b>© OpenStreetMap contributors</b>ODbL 1.0 · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">openstreetmap.org/copyright</a></div>
+    <div class="attr"><b>MOTIS</b>MIT License · <a href="https://github.com/motis-project/motis" target="_blank" rel="noopener">github.com/motis-project/motis</a></div>
+    ${NET.cities.map(c => `<div class="attr"><b>${esc(c.operator)} — GTFS</b>${t("license")}: ${esc(c.source.license)} · <a href="${esc(c.source.licenseUrl)}" target="_blank" rel="noopener">${t("open_link")}</a><br><span class="muted small">Mobility Database ${esc(c.source.mdbId)}</span></div>`).join("")}
+    <div class="attr"><b>Mobility Database</b>${lang() === "it" ? "Catalogo dei feed" : "Feed catalogue"} · <a href="https://mobilitydatabase.org" target="_blank" rel="noopener">mobilitydatabase.org</a></div>`;
+}
+
+/* ---------------- events ---------------- */
+let toastT;
+function toast(msg) { clearTimeout(toastT); $("#overlay").innerHTML = `<div class="toast" role="status">${esc(msg)}</div>`; toastT = setTimeout(() => { $("#overlay").innerHTML = ""; }, 2600); }
+function askLocation() {
+  $("#overlay").innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="locT"><div class="card"><h3 id="locT">${t("loc_title")}</h3><p class="prose">${t("loc_body")}</p><div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn text" data-act="loc-no">${t("loc_deny")}</button><button class="btn" data-act="loc-yes">${t("loc_allow")}</button></div></div></div>`;
+  $("#overlay [data-act=loc-yes]").focus();
+}
+app.addEventListener("click", e => {
+  const b = e.target.closest("button,[data-act]"); if (!b) return;
+  const d = b.dataset;
+  if (d.tab) { S.focus = null; return go(d.tab); }
+  if (d.area) { S.nearbyArea = d.area; return render(); }
+  if (d.city) { S.linesCity = d.city; return render(); }
+  if (d.line) { S.linesCity = cityOf(d.line); S.tab = "lines"; return go("lines", "line", { id: d.line, branch: 0 }); }
+  if (d.branch) { S.params.branch = +d.branch; return render(); }
+  if (d.station) { return go("lines", "station", { sid: d.station, fromLine: S.params.id || S.params.fromLine }); }
+  if (d.time) { S.timeMode = d.time; if (!S.timeVal) S.timeVal = defaultTimeVal(); return render(); }
+  if (d.pref) { S.pref = d.pref; return render(); }
+  if (d.set === "language") { S.langPref = d.v; store.set("lang", d.v); applyTheme(); return render(); }
+  if (d.set === "theme") { S.themePref = d.v; store.set("theme", d.v); applyTheme(); return render(); }
+  switch (d.act) {
+    case "pick": { const p = $("#sugg")._res[+d.i]; const tgt = S.focus === "toIn" ? "to" : "from"; S[tgt] = { ...p }; S.focus = null; if (S.from && S.to) return doSearch(); render(); setTimeout(() => $(tgt === "from" ? "#toIn" : "#fromIn")?.focus(), 0); return; }
+    case "swap": [S.from, S.to] = [S.to, S.from]; return render();
+    case "search": { const ti = $("#timeIn"); if (ti) S.timeVal = ti.value; return doSearch(); }
+    case "preset": { const [a, b2] = d.k.split(">"); const mk = k => ({ kind: "place", key: k, name: LIVE.places[k][0], lat: LIVE.places[k][1], lon: LIVE.places[k][2] }); S.from = mk(a); S.to = mk(b2); return doSearch(); }
+    case "recent": { const r = S.recents[+d.i]; S.from = r.from; S.to = r.to; S.tab = "plan"; return doSearch(); }
+    case "to-plan": return go("plan");
+    case "to-results": return go("plan", "results");
+    case "live-detail": return go("plan", "detail", { live: true, i: +d.i });
+    case "off-detail": return go("plan", "detail", { live: false, i: +d.i });
+    case "to-lines": return go("lines");
+    case "to-line": return S.params.fromLine ? go("lines", "line", { id: S.params.fromLine, branch: 0 }) : go("lines");
+    case "to-more": return go("more");
+    case "privacy": return go("more", "privacy");
+    case "attr": return go("more", "attr");
+    case "st-from": case "st-to": { const st = stations[S.params.sid]; S[d.act === "st-from" ? "from" : "to"] = { kind: "station", sid: S.params.sid, name: st.name, lat: st.lat, lon: st.lon }; return go("plan"); }
+    case "myloc": askLocation(); return;
+    case "loc-no": $("#overlay").innerHTML = ""; S.locDenied = true; toast(t("loc_denied")); return;
+    case "loc-yes": $("#overlay").innerHTML = ""; S.locDenied = true; toast(t("loc_denied")); return; // the preview frame refuses geolocation; the app asks the OS here
+    case "pickmap": toast(t("pick_map") + " …"); setSnap(0); map.onTap = ([lat, lon]) => { const tgt = S.from ? "to" : "from"; S[tgt] = { kind: "address", name: `${nf(lat, { maximumFractionDigits: 4 })}, ${nf(lon, { maximumFractionDigits: 4 })}`, lat, lon }; setSnap(1); render(); }; return;
+    case "use-home": S[S.from ? "to" : "from"] = S.home; return render();
+    case "use-work": S[S.from ? "to" : "from"] = S.work; return render();
+    case "save-home": S.home = S.to; store.set("home", S.home); return render();
+    case "save-work": S.work = S.to; store.set("work", S.work); return render();
+    case "go-home": S.to = S.home; return go("plan");
+    case "go-work": S.to = S.work; return go("plan");
+    case "dismiss-strike": S.strikeDismissed = true; return renderChrome();
+  }
+});
+$("#locate").onclick = () => askLocation();
+document.addEventListener("keydown", e => { if (e.key === "Escape" && $("#overlay").innerHTML) $("#overlay").innerHTML = ""; });
+
+/* ---------------- aside ---------------- */
+const nLive = Object.values(LIVE.plans).reduce((a, p) => a + p.length, 0);
+$("#stats").innerHTML = `<div class="stat"><b class="tnum">${NET.lines.length}</b><span>lines from GTFS</span></div><div class="stat"><b class="tnum">${Object.keys(stations).length}</b><span>stations</span></div><div class="stat"><b class="tnum">${nLive}</b><span>Transitous journeys</span></div>`;
+$("#srcList").innerHTML = NET.cities.map(c => `<li><b>${esc(c.name)}</b> · ${esc(c.operator)} GTFS (${esc(c.source.license)})</li>`).join("") + `<li><b>Transitous</b> (MOTIS 2) journeys, departures and geocoding, recorded ${esc(fmtDayTime(CAPTURED))}</li>`;
+
+applyTheme(); render(); setSnap(1);
+})();
+</script>
