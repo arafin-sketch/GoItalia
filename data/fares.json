@@ -54,7 +54,24 @@
           "price": 250.0
         }
       ],
-      "checked": "2026-11-18"
+      "checked": "2026-11-18",
+      "buy": [
+        {
+          "en": "ATAC Roma app",
+          "it": "App ATAC Roma",
+          "url": "https://www.atac.roma.it/biglietti-e-abbonamenti/app-atac-roma"
+        },
+        {
+          "en": "All tickets and passes",
+          "it": "Tutti i biglietti e abbonamenti",
+          "url": "https://www.atac.roma.it/biglietti-e-abbonamenti"
+        }
+      ],
+      "contactless": {
+        "en": "Tap&Go: pay with a contactless bank card instead of buying a ticket. See ATAC for where it works.",
+        "it": "Tap&Go: paga con la carta contactless invece di comprare il biglietto. Vedi ATAC per dove funziona.",
+        "url": "https://www.atac.roma.it/biglietti-e-abbonamenti/tap-and-go"
+      }
     },
     "milan": {
       "operator": "ATM Milano",
@@ -80,7 +97,24 @@
           "it_note": "Con la stessa carta contactless non paghi mai più di così in un giorno"
         }
       ],
-      "checked": "2026-11-18"
+      "checked": "2026-11-18",
+      "buy": [
+        {
+          "en": "ATM contactless payment",
+          "it": "Pagamento contactless ATM",
+          "url": "https://www.atm.it/it/ViaggiaConNoi/pagamenti_servizi_digitali/Pagine/biglietto_Contactless.aspx"
+        },
+        {
+          "en": "ATM fare system",
+          "it": "Sistema tariffario ATM",
+          "url": "https://nuovosistematariffario.atm.it/"
+        }
+      ],
+      "contactless": {
+        "en": "No ticket needed: tap the same contactless bank card at the gates or on board. A single trip in Mi1–Mi3 costs €2.20 and you never pay more than €7.60 in a day.",
+        "it": "Nessun biglietto: avvicina la stessa carta contactless ai tornelli o a bordo. Un viaggio in Mi1–Mi3 costa €2,20 e in un giorno non paghi mai più di €7,60.",
+        "url": "https://www.atm.it/it/ViaggiaConNoi/pagamenti_servizi_digitali/Pagine/biglietto_Contactless.aspx"
+      }
     },
     "naples": {
       "operator": "UnicoCampania (ANM, EAV)",
@@ -113,7 +147,14 @@
           "price": 16.2
         }
       ],
-      "checked": "2026-11-18"
+      "checked": "2026-11-18",
+      "buy": [
+        {
+          "en": "UnicoCampania (app and ticket finder)",
+          "it": "UnicoCampania (app e ricerca tariffa)",
+          "url": "https://www.unicocampania.it/"
+        }
+      ]
     },
     "turin": {
       "operator": "GTT",
@@ -167,7 +208,14 @@
           "paper": 12.5
         }
       ],
-      "checked": "2026-11-18"
+      "checked": "2026-11-18",
+      "buy": [
+        {
+          "en": "GTT tickets (TO Move app, BIP card)",
+          "it": "Biglietti GTT (app TO Move, carta BIP)",
+          "url": "https://www.gtt.to.it/cms/biglietti-abbonamenti"
+        }
+      ]
     },
     "catania": {
       "operator": "FCE (metro) · AMTS",
@@ -214,13 +262,32 @@
           "price": 4.5
         }
       ],
-      "checked": "2026-11-18"
+      "checked": "2026-11-18",
+      "buy": [
+        {
+          "en": "FCE online tickets",
+          "it": "Biglietti online FCE",
+          "url": "https://eticketing.circumetnea.it/"
+        },
+        {
+          "en": "Where to buy",
+          "it": "Dove acquistare",
+          "url": "https://www.circumetnea.it/biglietterie-e-rivendite/"
+        }
+      ]
     },
     "genoa": {
       "operator": "AMT Genova",
       "source": "https://www.amt.genova.it/amt/biglietti-e-abbonamenti/",
       "agencies": "amt",
-      "tickets": []
+      "tickets": [],
+      "buy": [
+        {
+          "en": "AMT Genova tickets",
+          "it": "Biglietti AMT Genova",
+          "url": "https://www.amt.genova.it/amt/biglietti-e-abbonamenti/"
+        }
+      ]
     }
   }
 }

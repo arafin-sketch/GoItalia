@@ -13,6 +13,7 @@ const store = {
 /* ================= i18n ================= */
 const STR = {
  en: {
+  contactless: "Pay by contactless", more_info: "More info", buy_tickets: "Buy tickets", buy_note: "Tickets are sold by the operators. ItaliaNow takes you to their official app or website.", live_legend: "Live position", sched_legend: "Timetable position",
   good_morning: "Good morning", good_afternoon: "Good afternoon", good_evening: "Good evening", good_night: "Good night", departing: "Departing nearby", see_all_stops: "All stops nearby", set: "Set", service_alerts: "Service alerts", prices_auto: "Prices are read from the official websites every day.", checked_on: "Checked {d}",
   tickets: "Tickets", ticket_prices: "Ticket prices", tickets_in: "Tickets in {c}", from_price: "from {p}", valid_min: "Valid {m} min", fare_other: "Train or regional fare: check with the operator", fare_n: "{n} × {t}", prices_checked: "Official prices from {o}, checked {d}.", official_site: "Official website", no_prices: "We couldn't verify prices for this city yet. See the operator's website.", paper: "{p} on paper",
   home_tab: "Home", stations: "Stations", nearest: "Nearest stops", favourites: "Favourites", stop_code: "Stop {c}", walk_min: "{m} min walk", all_deps: "All departures", scheduled: "Scheduled", search_line: "Search for a line", alerts: "Alerts", recent_lines: "Recent", clear: "Clear", no_alerts: "No service alerts reported right now.", no_fav_stops: "No favourite stops yet. Tap the star on a stop to add it.", no_fav_lines: "No favourite lines yet. Tap the star on a line to add it.", show_more: "Show more", direction: "Direction", tap_stop: "Tap a stop to see when this line arrives there.", vehicles_now: n => n === 1 ? "1 vehicle on the line now" : `${n} vehicles on the line now`, no_lines: "No lines match your search.", loading_lines: "Loading lines…", n_alerts: n => n === 1 ? "1 service alert" : `${n} service alerts`, add_fav: "Add to favourites", remove_fav: "Remove from favourites", lines_at: "Lines", no_live_here: "No departures of this line in the next hour.", city: "City",
@@ -53,6 +54,7 @@ const STR = {
   about: "About", lines_title: "Lines", stop_dep: "Departures", geo_err: "Search is unavailable right now. Showing stations from the built-in network.",
  },
  it: {
+  contactless: "Paga con carta contactless", more_info: "Maggiori informazioni", buy_tickets: "Acquista biglietti", buy_note: "I biglietti sono venduti dagli operatori. ItaliaNow ti porta alla loro app o al sito ufficiale.", live_legend: "Posizione in tempo reale", sched_legend: "Posizione da orario",
   good_morning: "Buongiorno", good_afternoon: "Buon pomeriggio", good_evening: "Buonasera", good_night: "Buonanotte", departing: "In partenza qui vicino", see_all_stops: "Tutte le fermate vicine", set: "Imposta", service_alerts: "Avvisi di servizio", prices_auto: "I prezzi vengono letti ogni giorno dai siti ufficiali.", checked_on: "Verificati il {d}",
   tickets: "Biglietti", ticket_prices: "Prezzi dei biglietti", tickets_in: "Biglietti a {c}", from_price: "da {p}", valid_min: "Valido {m} min", fare_other: "Tariffa treno o regionale: verifica con l'operatore", fare_n: "{n} × {t}", prices_checked: "Prezzi ufficiali di {o}, verificati il {d}.", official_site: "Sito ufficiale", no_prices: "Non abbiamo ancora potuto verificare i prezzi per questa città. Consulta il sito dell'operatore.", paper: "{p} su carta",
   home_tab: "Home", stations: "Fermate", nearest: "Fermate più vicine", favourites: "Preferiti", stop_code: "Fermata {c}", walk_min: "{m} min a piedi", all_deps: "Tutte le partenze", scheduled: "Programmato", search_line: "Cerca una linea", alerts: "Avvisi", recent_lines: "Recenti", clear: "Cancella", no_alerts: "Nessun avviso di servizio al momento.", no_fav_stops: "Nessuna fermata preferita. Tocca la stella su una fermata per aggiungerla.", no_fav_lines: "Nessuna linea preferita. Tocca la stella su una linea per aggiungerla.", show_more: "Mostra altre", direction: "Direzione", tap_stop: "Tocca una fermata per vedere quando passa questa linea.", vehicles_now: n => n === 1 ? "1 mezzo in linea ora" : `${n} mezzi in linea ora`, no_lines: "Nessuna linea corrisponde alla ricerca.", loading_lines: "Caricamento linee…", n_alerts: n => n === 1 ? "1 avviso di servizio" : `${n} avvisi di servizio`, add_fav: "Aggiungi ai preferiti", remove_fav: "Rimuovi dai preferiti", lines_at: "Linee", no_live_here: "Nessun passaggio di questa linea nella prossima ora.", city: "Città",
@@ -158,6 +160,7 @@ const I = {
   near: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/></svg>',
   lines: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 3v18M12 3v6a4 4 0 0 0 4 4h0a4 4 0 0 1 4 4v4"/><circle cx="5" cy="8" r="1.6" fill="currentColor"/><circle cx="5" cy="16" r="1.6" fill="currentColor"/></svg>',
   more: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+  card: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6 15h4"/><path d="M15.5 13.5a3 3 0 0 1 0 3M17.5 12a5.5 5.5 0 0 1 0 6" /></svg>',
   ticket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2.5 2.5 0 0 0 0 5v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2.5 2.5 0 0 0 0-5V7z"/><path d="M14 5v14" stroke-dasharray="2 2.5"/></svg>',
   route: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.5"/></svg>',
   warn: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>',
@@ -317,7 +320,8 @@ function addLayers() {
   addVehicleIcons();
   map.addLayer({ id: "veh", type: "symbol", source: "vehicles", layout: {
     "icon-image": ["concat", "veh-", ["get", "cat"]], "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0.5, 14, 0.78, 17, 1],
-    "icon-allow-overlap": true, "icon-ignore-placement": true, "symbol-sort-key": ["match", ["get", "cat"], "train", 1, "metro", 2, "tram", 3, 4] } });
+    "icon-allow-overlap": true, "icon-ignore-placement": true, "symbol-sort-key": ["match", ["get", "cat"], "train", 1, "metro", 2, "tram", 3, 4] },
+    paint: { "icon-opacity": ["case", ["get", "rt"], 1, 0.42] } }); // faded = position estimated from the timetable
   if (map.getStyle().glyphs) map.addLayer({ id: "veh-label", type: "symbol", source: "vehicles", minzoom: 14,
     layout: { "text-field": ["get", "name"], "text-size": 11, "text-offset": [0, -1.7], "text-allow-overlap": false, "text-font": ["Open Sans Bold", "Noto Sans Bold", "Montserrat Bold"] },
     paint: { "text-color": isDark() ? "#E4EBE7" : "#16201B", "text-halo-color": isDark() ? "#0B0F0D" : "#FFFFFF", "text-halo-width": 1.5 } });
@@ -342,7 +346,7 @@ function addVehicleIcons() {
 function renderLegend(cats) {
   const el = $("#legend"); if (!el) return;
   const list = ["bus", "tram", "metro", "train", "ferry", "other"].filter(c => cats.has(c));
-  el.innerHTML = list.map(c => `<span><i class="lg-${c === "train" || c === "metro" ? "sq" : "ci"}" style="background:#${VEH_STYLE[c][0]}"></i>${t(c === "other" ? "funicular" : c)}</span>`).join("");
+  el.innerHTML = (list.length ? `<span class="lg-live"><i class="lg-ci full"></i>${t("live_legend")}</span><span class="lg-live"><i class="lg-ci faded"></i>${t("sched_legend")}</span><span class="lg-br"></span>` : "") + list.map(c => `<span><i class="lg-${c === "train" || c === "metro" ? "sq" : "ci"}" style="background:#${VEH_STYLE[c][0]}"></i>${t(c === "other" ? "funicular" : c)}</span>`).join("");
   el.hidden = !list.length;
 }
 function applyVehicleFilter() { if (!mapReady || !map.getLayer("veh")) return; const f = S.modeFilter === "all" ? null : ["==", ["get", "cat"], S.modeFilter]; map.setFilter("veh", f); if (map.getLayer("veh-label")) map.setFilter("veh-label", f); }
@@ -361,7 +365,7 @@ async function loadVehicles() {
       const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + hav(pts[i - 1], pts[i]));
       const tr = s.trips?.[0] || {};
       return { pts, cum, dep: +new Date(s.departure), arr: +new Date(s.arrival), mode: s.mode, cat: modeCat(s.mode), color: "#" + liveColor(s.routeColor, s.mode),
-        name: liveName(tr.routeShortName || ""), tripId: tr.tripId, rawColor: liveColor(s.routeColor, s.mode) };
+        name: liveName(tr.routeShortName || ""), tripId: tr.tripId, rawColor: liveColor(s.routeColor, s.mode), rt: !!s.realTime };
     });
   } catch { /* keep the last positions; the badge shows offline */ }
   drawVehicles();
@@ -380,7 +384,7 @@ function drawVehicles() {
     if (S.lineFocus && (v.name !== S.lineFocus.name || v.cat !== S.lineFocus.cat)) continue;
     if (v.tripId) { if (seen.has(v.tripId)) continue; seen.add(v.tripId); }
     const [la, lo] = vehiclePos(v, now);
-    feats.push({ type: "Feature", properties: { color: v.color, cat: v.cat, name: v.name, tripId: v.tripId || "", mode: v.mode, rawColor: v.rawColor }, geometry: { type: "Point", coordinates: [lo, la] } });
+    feats.push({ type: "Feature", properties: { color: v.color, cat: v.cat, name: v.name, tripId: v.tripId || "", mode: v.mode, rawColor: v.rawColor, rt: v.rt }, geometry: { type: "Point", coordinates: [lo, la] } });
   }
   map.getSource("vehicles").setData({ type: "FeatureCollection", features: feats });
   renderLegend(new Set(feats.filter(f => S.modeFilter === "all" || f.properties.cat === S.modeFilter).map(f => f.properties.cat)));
@@ -823,6 +827,8 @@ function renderTickets(el) {
     ${mine ? "" : `<div class="chips" role="group">${cities.map(c => `<button class="chip" data-tcity="${c}" aria-pressed="${c === city}">${esc(cityById[c]?.name || c)}</button>`).join("")}</div>`}
     ${!F ? `<div class="skel"></div>` : F.tickets.length ? `<div class="list" style="margin-top:8px">${F.tickets.map(tk => `<div class="ticket"><div><b>${esc(tName(tk))}</b>${tk.minutes ? `<small>${t("valid_min", { m: tk.minutes })}</small>` : ""}${tk[lang() + "_note"] ? `<small>${esc(tk[lang() + "_note"])}</small>` : ""}</div><span class="price tnum">${eur(tk.price)}</span></div>`).join("")}</div>`
       : `<div class="alert" style="margin-top:8px">${I.warn}<span>${t("no_prices")}</span></div>`}
+    ${F?.contactless ? `<div class="tip"><span class="tip-ic">${I.card}</span><div><b>${t("contactless")}</b><p>${esc(F.contactless[lang()])}</p><a href="${esc(F.contactless.url)}" target="_blank" rel="noopener">${t("more_info")}</a></div></div>` : ""}
+    ${F?.buy?.length ? `<h3 class="sub">${t("buy_tickets")}</h3><div class="list">${F.buy.map(b => `<a class="buyrow" href="${esc(b.url)}" target="_blank" rel="noopener"><span>${esc(b[lang()])}<small>${esc(new URL(b.url).hostname.replace(/^www\./, ""))}</small></span>${I.ext}</a>`).join("")}</div><p class="small muted" style="margin:8px 0 0">${t("buy_note")}</p>` : ""}
     ${F ? `<p class="small muted" style="margin:14px 0 8px">${esc(t("prices_checked", { o: F.operator, d: F.checked ? new Intl.DateTimeFormat(locale(), { dateStyle: "long", timeZone: "UTC" }).format(new Date(F.checked)) : checked }))} ${t("prices_auto")}</p><a class="btn tonal" href="${esc(F.source)}" target="_blank" rel="noopener">${t("official_site")} ${I.ext.replace("<svg", '<svg width="16" height="16"')}</a>` : ""}`;
   clearMarkers(); showMe();
 }
