@@ -1,5 +1,5 @@
 {
-  "checked": "2026-11-18",
+  "checked": "2026-11-19",
   "note": "Prices copied from each operator's official website on the date above. Update them when tariffs change.",
   "cities": {
     "rome": {
@@ -54,7 +54,7 @@
           "price": 250.0
         }
       ],
-      "checked": "2026-11-18",
+      "checked": "2026-11-19",
       "buy": [
         {
           "en": "ATAC Roma app",
@@ -97,7 +97,7 @@
           "it_note": "Con la stessa carta contactless non paghi mai più di così in un giorno"
         }
       ],
-      "checked": "2026-11-18",
+      "checked": "2026-11-19",
       "buy": [
         {
           "en": "ATM contactless payment",
@@ -147,7 +147,7 @@
           "price": 16.2
         }
       ],
-      "checked": "2026-11-18",
+      "checked": "2026-11-19",
       "buy": [
         {
           "en": "UnicoCampania (app and ticket finder)",
@@ -208,7 +208,7 @@
           "paper": 12.5
         }
       ],
-      "checked": "2026-11-18",
+      "checked": "2026-11-19",
       "buy": [
         {
           "en": "GTT tickets (TO Move app, BIP card)",
@@ -262,7 +262,7 @@
           "price": 4.5
         }
       ],
-      "checked": "2026-11-18",
+      "checked": "2026-11-19",
       "buy": [
         {
           "en": "FCE online tickets",
