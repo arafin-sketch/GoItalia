@@ -14,7 +14,7 @@ const store = {
 const STR = {
  en: {
   contactless: "Pay by contactless", more_info: "More info", buy_tickets: "Buy tickets", buy_note: "Tickets are sold by the operators. ItaliaNow takes you to their official app or website.", live_legend: "Live position", sched_legend: "Timetable position",
-  good_morning: "Good morning", good_afternoon: "Good afternoon", good_evening: "Good evening", good_night: "Good night", departing: "Departing nearby", see_all_stops: "All stops nearby", set: "Set", service_alerts: "Service alerts", prices_auto: "Prices are read from the official websites every day.", checked_on: "Checked {d}",
+  good_morning: "Good morning", good_afternoon: "Good afternoon", good_evening: "Good evening", good_night: "Good night", departing: "Departing nearby", live_trains: "Live trains", trains_at: "Trains at {s}", departures: "Departures", departed: "left", updated_short: "updated {t}", stale_board: "last available board", trains_note: "Live train times, delays and platforms from RFI ViaggiaTreno. Trenitalia and most regional trains; Italo is not included.", see_all_stops: "All stops nearby", set: "Set", service_alerts: "Service alerts", prices_auto: "Prices are read from the official websites every day.", checked_on: "Checked {d}",
   tickets: "Tickets", ticket_prices: "Ticket prices", tickets_in: "Tickets in {c}", from_price: "from {p}", valid_min: "Valid {m} min", fare_other: "Train or regional fare: check with the operator", fare_n: "{n} × {t}", prices_checked: "Official prices from {o}, checked {d}.", official_site: "Official website", no_prices: "We couldn't verify prices for this city yet. See the operator's website.", paper: "{p} on paper",
   home_tab: "Home", stations: "Stations", nearest: "Nearest stops", favourites: "Favourites", stop_code: "Stop {c}", walk_min: "{m} min walk", all_deps: "All departures", scheduled: "Scheduled", search_line: "Search for a line", alerts: "Alerts", recent_lines: "Recent", clear: "Clear", no_alerts: "No service alerts reported right now.", no_fav_stops: "No favourite stops yet. Tap the star on a stop to add it.", no_fav_lines: "No favourite lines yet. Tap the star on a line to add it.", show_more: "Show more", direction: "Direction", tap_stop: "Tap a stop to see when this line arrives there.", vehicles_now: n => n === 1 ? "1 vehicle on the line now" : `${n} vehicles on the line now`, no_lines: "No lines match your search.", loading_lines: "Loading lines…", n_alerts: n => n === 1 ? "1 service alert" : `${n} service alerts`, add_fav: "Add to favourites", remove_fav: "Remove from favourites", lines_at: "Lines", no_live_here: "No departures of this line in the next hour.", city: "City",
   plan: "Directions", nearby: "Nearby", where_to: "Where to?", set_home: "Set home", set_work: "Set work", save_place: "Save this destination", saved_places: "Saved places", remove: "Remove", share: "Share", copied: "Copied", install: "Install app", install_s: "Add ItaliaNow to your home screen.", sort_by: "Sort", set_hint: "Search for a place, then save it as Home or Work from the results.", lines: "Lines", saved: "Saved", more: "More",
@@ -55,7 +55,7 @@ const STR = {
  },
  it: {
   contactless: "Paga con carta contactless", more_info: "Maggiori informazioni", buy_tickets: "Acquista biglietti", buy_note: "I biglietti sono venduti dagli operatori. ItaliaNow ti porta alla loro app o al sito ufficiale.", live_legend: "Posizione in tempo reale", sched_legend: "Posizione da orario",
-  good_morning: "Buongiorno", good_afternoon: "Buon pomeriggio", good_evening: "Buonasera", good_night: "Buonanotte", departing: "In partenza qui vicino", see_all_stops: "Tutte le fermate vicine", set: "Imposta", service_alerts: "Avvisi di servizio", prices_auto: "I prezzi vengono letti ogni giorno dai siti ufficiali.", checked_on: "Verificati il {d}",
+  good_morning: "Buongiorno", good_afternoon: "Buon pomeriggio", good_evening: "Buonasera", good_night: "Buonanotte", departing: "In partenza qui vicino", live_trains: "Treni in tempo reale", trains_at: "Treni a {s}", departures: "Partenze", departed: "partito", updated_short: "agg. {t}", stale_board: "ultimo quadro disponibile", trains_note: "Orari, ritardi e binari in tempo reale da RFI ViaggiaTreno. Trenitalia e gran parte dei regionali; Italo non è incluso.", see_all_stops: "Tutte le fermate vicine", set: "Imposta", service_alerts: "Avvisi di servizio", prices_auto: "I prezzi vengono letti ogni giorno dai siti ufficiali.", checked_on: "Verificati il {d}",
   tickets: "Biglietti", ticket_prices: "Prezzi dei biglietti", tickets_in: "Biglietti a {c}", from_price: "da {p}", valid_min: "Valido {m} min", fare_other: "Tariffa treno o regionale: verifica con l'operatore", fare_n: "{n} × {t}", prices_checked: "Prezzi ufficiali di {o}, verificati il {d}.", official_site: "Sito ufficiale", no_prices: "Non abbiamo ancora potuto verificare i prezzi per questa città. Consulta il sito dell'operatore.", paper: "{p} su carta",
   home_tab: "Home", stations: "Fermate", nearest: "Fermate più vicine", favourites: "Preferiti", stop_code: "Fermata {c}", walk_min: "{m} min a piedi", all_deps: "Tutte le partenze", scheduled: "Programmato", search_line: "Cerca una linea", alerts: "Avvisi", recent_lines: "Recenti", clear: "Cancella", no_alerts: "Nessun avviso di servizio al momento.", no_fav_stops: "Nessuna fermata preferita. Tocca la stella su una fermata per aggiungerla.", no_fav_lines: "Nessuna linea preferita. Tocca la stella su una linea per aggiungerla.", show_more: "Mostra altre", direction: "Direzione", tap_stop: "Tocca una fermata per vedere quando passa questa linea.", vehicles_now: n => n === 1 ? "1 mezzo in linea ora" : `${n} mezzi in linea ora`, no_lines: "Nessuna linea corrisponde alla ricerca.", loading_lines: "Caricamento linee…", n_alerts: n => n === 1 ? "1 avviso di servizio" : `${n} avvisi di servizio`, add_fav: "Aggiungi ai preferiti", remove_fav: "Rimuovi dai preferiti", lines_at: "Linee", no_live_here: "Nessun passaggio di questa linea nella prossima ora.", city: "Città",
   plan: "Percorso", nearby: "Vicino", where_to: "Dove vuoi andare?", set_home: "Imposta casa", set_work: "Imposta lavoro", save_place: "Salva questa destinazione", saved_places: "Luoghi salvati", remove: "Rimuovi", share: "Condividi", copied: "Copiato", install: "Installa app", install_s: "Aggiungi ItaliaNow alla schermata Home.", sort_by: "Ordina", set_hint: "Cerca un luogo, poi salvalo come Casa o Lavoro dai risultati.", lines: "Linee", saved: "Salvati", more: "Altro",
@@ -228,6 +228,7 @@ let FARES = null;
 const eur = v => new Intl.NumberFormat(locale(), { style: "currency", currency: "EUR" }).format(v);
 async function loadNetwork() {
   fetch("data/fares.json").then(r => r.json()).then(f => { FARES = f; if (S.tab === "home" && !S.view) render(); }).catch(() => {});
+  loadTrains(true).then(() => { if (S.tab === "home" && !S.view) render(); });
   NET = await (await fetch("data/network.json")).json();
   lineById = Object.fromEntries(NET.lines.map(l => [l.id, l])); cityById = Object.fromEntries(NET.cities.map(c => [c.id, c])); stations = NET.stations;
   for (const [a, b, d, w] of NET.transfers) { (transfersAt[a] ||= []).push({ to: b, d, w }); (transfersAt[b] ||= []).push({ to: a, d, w }); }
@@ -534,7 +535,7 @@ async function startWithLocation(ask) {
 /* ================= nearby (live) ================= */
 let refreshTimer = null, nearbyReq = 0;
 function stopRefresh() { clearInterval(refreshTimer); refreshTimer = null; }
-function startRefresh() { stopRefresh(); refreshTimer = setInterval(() => { if (document.visibilityState !== "visible") return; if (S.view === "trip") return render(); if (!["nearby", "home"].includes(S.tab)) return; if (S.tab === "nearby" && S.stationsTab === "fav" && !S.view) return loadFavourites(true); loadNearby(S.nearby.center, true); }, CFG.REFRESH_SECONDS * 1000); }
+function startRefresh() { stopRefresh(); refreshTimer = setInterval(() => { if (document.visibilityState !== "visible") return; if (S.view === "trip") return render(); if (!["nearby", "home"].includes(S.tab)) return; if (S.tab === "nearby" && S.stationsTab === "fav" && !S.view) return loadFavourites(true); loadTrains(true).then(() => { if (S.view === "trains") render(); }); if (S.view === "trains") return; loadNearby(S.nearby.center, true); }, CFG.REFRESH_SECONDS * 1000); }
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && ["nearby", "home"].includes(S.tab) && S.nearby.updated && Date.now() - S.nearby.updated > CFG.REFRESH_SECONDS * 1000) loadNearby(S.nearby.center, true); });
 async function loadNearby(center = S.nearby.center || S.me || CFG.DEFAULT_CENTER, silent = false) {
   const id = ++nearbyReq; S.nearby.center = center; S.nearby.loading = true; S.nearby.error = null; $("#hereBtn").hidden = true;
@@ -698,6 +699,8 @@ function renderHome(el) {
       return `<div class="nstop"><button class="nhead" data-act="open-stop" data-i="${i}"><span class="sq" style="background:#${CAT_COLOR[cat]}">${modeIcon(CAT_ICON[cat])}</span><span class="hmid"><b>${esc(titleish(s.name))}</b><small>${[t("walk_min", { m: nf(walk) }), fmtDist(s.distance), s.stopCode ? t("stop_code", { c: esc(s.stopCode) }) : ""].filter(Boolean).join(" · ")}</small></span>${I.chev}</button>
         ${groups.map(g => homeRow({ s, g, compact: true })).join("")}</div>`;
     }).join("") : `<div class="empty">${t("no_service")}</div>`;
+    const ts = nearestTrainStation(S.me || n.center);
+    if (ts) html += `<button class="card traincard" data-act="train-board" data-code="${ts.code}"><span class="tk-ic" style="background:#C62828">${modeIcon("RAIL").replace("<svg", '<svg width="20" height="20"')}</span><span class="tc-t"><b>${t("trains_at", { s: esc(ts.name) })}</b><small>${ts.dep[0] ? esc(titleish(ts.dep[0].to)) + " · " + esc(ts.dep[0].t) : t("departures")}</small></span>${I.chev}</button>`;
     html += `<button class="btn tonal seeall" data-tab="nearby">${t("see_all_stops")} ${I.chev}</button>`;
   }
   el.innerHTML = html;
@@ -786,6 +789,40 @@ function nearbyOffline(c) {
   if (!near.length) return "";
   const p = romeParts(new Date()); const sec = p.h * 3600 + p.mi * 60;
   return `<h3 class="sub">${t("offline")}</h3><div class="list">${near.map(({ st, d }) => `<div class="stop-card"><div class="stop-head"><b>${esc(st.name)}</b><span class="muted small">${fmtDist(d)}</span></div>${st.lines.map(id => { const L = lineById[id], hw = headwayAt(L, sec); return `<div class="dep">${chip(lineName(L), L.color, L.mode)}<div class="hd">${esc(lineTermini(L))}<small>${t("est")}</small></div><div class="tm small">${hw ? t("every", { m: nf(Math.round(hw)) }) : t("no_service")}</div></div>`; }).join("")}</div>`).join("")}</div>`;
+}
+
+/* ================= live trains (RFI ViaggiaTreno) ================= */
+let TRAINS = null, trainsAt = 0;
+async function loadTrains(force) {
+  if (!CFG.TRAINS || S.simOffline) return;
+  if (!force && TRAINS && Date.now() - trainsAt < 45000) return;
+  try { const r = await fetch("data/trains.json", { cache: "no-store" }); TRAINS = await r.json(); trainsAt = Date.now(); }
+  catch {}
+}
+function nearestTrainStation(c) {
+  if (!TRAINS?.stations?.length || !c) return null;
+  let best = null, bd = 2500;
+  for (const s of TRAINS.stations) { const d = hav(c, [s.lat, s.lon]); if (d < bd) { bd = d; best = { ...s, d }; } }
+  return best;
+}
+const trainCat = c => ({ FR: "C62828", FA: "B08A2E", FB: "9A6A2E", REG: "2E7D32", RV: "1565C0", IC: "00695C", ICN: "4527A0", EC: "00695C", EN: "4527A0", ITA: "9A1F3C" }[c] || "C62828");
+function trainRow(x) {
+  const delay = x.x ? `<span class="delay cx">${t("cancelled")}</span>` : x.d == null ? "" : x.d <= 0 ? `<span class="delay ontime">${x.d < 0 ? t("early", { m: nf(-x.d) }) : t("on_time")}</span>` : `<span class="delay late">${t("late", { m: nf(x.d) })}</span>`;
+  const rt = x.d != null && !x.x;
+  return `<div class="dep train ${x.x ? "cancelled" : ""}"><span class="lc" style="background:#${trainCat(x.c)};color:#fff">${esc(x.c || "")}</span>
+    <div class="hd">${esc(titleish(x.to))}<small>${x.n ? "#" + esc(x.n) : ""}${x.g ? " · " + t("departed") : ""}</small></div>
+    <div class="tm tnum"><div class="trow">${x.p ? `<span class="plat">${t("platform")} ${esc(x.p)}</span>` : ""}<b>${rt ? liveIcon + " " : ""}${esc(x.t)}</b></div>${delay}</div></div>`;
+}
+function renderTrainBoard(el) {
+  const st = (TRAINS?.stations || []).find(s => s.code === S.params.code) || nearestTrainStation(S.me || S.nearby.center);
+  if (!st) return go(S.params.back || "home");
+  const upd = TRAINS?.updated ? fmtTime(new Date(TRAINS.updated)) : "";
+  el.innerHTML = `${backBtn(S.params.back || "to-home")}
+    <div class="row" style="gap:10px;margin:2px 0 2px"><span class="sq" style="background:#C62828;flex:none">${modeIcon("RAIL")}</span><h2 class="title" style="margin:0;flex:1;min-width:0">${esc(st.name)}</h2></div>
+    <div class="refresh">${liveIcon} ${t("departures")} · ${st.stale ? t("stale_board") : t("updated_short", { t: upd })} · ${esc(TRAINS?.source || "")}</div>
+    <div class="stop-card">${st.dep.length ? st.dep.map(trainRow).join("") : `<div class="dep"><span></span><div class="hd muted">${t("no_service")}</div><span></span></div>`}</div>
+    <p class="small muted" style="margin:10px 0 0">${t("trains_note")}</p>`;
+  clearMarkers(); showMe(); addMarker(st.lat, st.lon, "mk-stop sel", modeIcon("RAIL")); flyTo(st.lat, st.lon, 15.5);
 }
 
 /* ================= fares ================= */
@@ -1190,7 +1227,7 @@ function render() {
   if (!(S.tab === "plan" && (S.view === "results" || S.view === "detail"))) setJourney(emptyFC);
   if (!(S.tab === "lines" && S.view)) setFocus(emptyFC);
   if (!(S.tab === "lines" && S.view === "lx") && S.lineFocus) { S.lineFocus = null; drawVehicles(); }
-  const v = S.view === "trip" ? renderTrip : S.view === "stop" ? renderStop : { tickets: renderTickets, home: renderHome, nearby: renderNearby, plan: renderPlan, lines: renderLines, more: renderMore }[S.tab];
+  const v = S.view === "trains" ? renderTrainBoard : S.view === "trip" ? renderTrip : S.view === "stop" ? renderStop : { tickets: renderTickets, home: renderHome, nearby: renderNearby, plan: renderPlan, lines: renderLines, more: renderMore }[S.tab];
   body.innerHTML = ""; const el = document.createElement("div"); el.className = "fade-in"; body.appendChild(el); v(el);
 }
 let toastT;
@@ -1241,6 +1278,7 @@ app.addEventListener("click", async e => {
       store.set("favStops", S.favStops); return render(); }
     case "fav-line": { const { city, i } = S.params; const k = lineKey(city, LIDX[city].routes[i]); S.favLines = S.favLines.includes(k) ? S.favLines.filter(x => x !== k) : [...S.favLines, k]; store.set("favLines", S.favLines); return render(); }
     case "open-tickets": return go("tickets");
+    case "train-board": return go("home", "trains", { code: d.code, back: S.tab === "home" ? "to-home" : "to-nearby" });
     case "to-home": return go("home");
     case "open-alerts": return go("more", "alerts", { back: S.tab === "home" ? "to-home" : "to-more" });
     case "clear-recent-lines": S.recentLines = S.recentLines.filter(k => !k.startsWith(S.linesCity + "|")); store.set("recentLines", S.recentLines); return fillLineList();

@@ -1,0 +1,34 @@
+name: Refresh live trains
+# Every few minutes: read the live departure boards of the main stations from RFI's
+# ViaggiaTreno and publish them to the website. Keeps the last board per station on failure.
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: { group: trains, cancel-in-progress: true }
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: gh-pages, path: site }
+      - uses: actions/checkout@v4
+        with: { path: repo }
+      - name: Read live boards from ViaggiaTreno
+        run: |
+          # carry the last published board forward so a failed station keeps its data
+          mkdir -p repo/preview/data
+          [ -f site/data/trains.json ] && cp site/data/trains.json repo/preview/data/trains.json || true
+          cd repo && python3 tools/trains/update_trains.py | tee /tmp/report.txt
+      - name: Publish to the website (gh-pages)
+        run: |
+          cp repo/preview/data/trains.json site/data/trains.json
+          cd site
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/trains.json
+          if git diff --cached --quiet; then echo "no change"; exit 0; fi
+          git commit -m "Live trains $(date -u +%H:%MZ)" -m "$(cat /tmp/report.txt)"
+          git push origin HEAD:gh-pages

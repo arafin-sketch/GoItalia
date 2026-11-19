@@ -192,3 +192,12 @@ a.btn{text-decoration:none}
 .legend .lg-live{color:var(--fg-2)}
 .legend{font-size:11px;padding:5px 9px;gap:3px 9px}
 .legend i{width:9px;height:9px}
+/* live train board */
+.traincard{display:flex;align-items:center;gap:12px;margin-top:10px;border:1px solid var(--line)}
+.traincard .tc-t{flex:1;min-width:0}
+.traincard small{display:block;color:var(--fg-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dep.train{grid-template-columns:auto 1fr auto}
+.dep.train .lc{min-width:34px;height:22px;font-size:12px;font-weight:800}
+.dep.train .trow{display:flex;align-items:center;justify-content:flex-end;gap:6px}
+.dep.train .plat{font-size:12px}
+.dep.train.cancelled .hd b,.dep.train.cancelled .tm b{text-decoration:line-through;color:var(--fg-3)}

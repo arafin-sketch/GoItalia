@@ -12,4 +12,9 @@ window.ITALIANOW_CONFIG = {
   CACHE_SECONDS: 25,
   MAX_PARALLEL_REQUESTS: 2,
   DEFAULT_CENTER: [41.8902, 12.4922], // Colosseo, used when location is off
+  // Live train boards (RFI ViaggiaTreno). The static file is refreshed by a GitHub
+  // workflow for the main stations. Set TRAINS_PROXY to your own proxy (e.g. a
+  // Cloudflare Worker, see tools/trains/worker.js) to get on-demand boards for ANY station.
+  TRAINS: true,
+  TRAINS_PROXY: "",
 };
