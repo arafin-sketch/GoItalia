@@ -1,0 +1,56 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@500;600;700&display=swap">
+<style>
+  *{margin:0;box-sizing:border-box}
+  html,body{width:1200px;height:630px}
+  .card{width:1200px;height:630px;position:relative;overflow:hidden;background:#0B6B4F;color:#fff;font-family:Inter,system-ui,sans-serif;padding:64px 72px;display:flex;flex-direction:column;justify-content:space-between}
+  .card::before{content:"";position:absolute;inset:0;background:radial-gradient(1200px 700px at 100% -10%,rgba(255,255,255,.14),transparent 60%),linear-gradient(135deg,#0E7A5A 0%,#0B6B4F 45%,#083F2E 100%)}
+  /* transit lines motif */
+  svg.lines{position:absolute;right:-40px;top:-40px;width:720px;height:720px;opacity:.5}
+  .top{display:flex;align-items:center;gap:26px;position:relative}
+  .mark{width:112px;height:112px;border-radius:28px;background:#fff;display:grid;place-items:center;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .mark svg{width:84px;height:84px}
+  .brand{font-family:Manrope,sans-serif;font-weight:800;font-size:60px;letter-spacing:-.02em}
+  .mid{position:relative}
+  h1{font-family:Manrope,sans-serif;font-weight:800;font-size:82px;line-height:1.02;letter-spacing:-.03em;max-width:17ch}
+  p.sub{margin-top:20px;font-size:34px;font-weight:600;color:#CFEFE0;max-width:24ch}
+  .chips{display:flex;gap:12px;margin-top:40px;flex-wrap:wrap}
+  .chip{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:12px 20px;border-radius:999px;font-size:26px;font-weight:700}
+  .dot{width:16px;height:16px;border-radius:50%}
+  .foot{display:flex;align-items:center;justify-content:space-between;position:relative;font-size:26px;font-weight:600;color:#BFE9D6}
+  .pill{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:10px 20px;border-radius:999px;color:#fff}
+</style></head>
+<body>
+<div class="card">
+  <svg class="lines" viewBox="0 0 400 400" fill="none" stroke-width="12" stroke-linecap="round">
+    <path d="M-20 120 L140 120 L240 20" stroke="#E3051B"/>
+    <path d="M-20 200 L120 200 L280 40" stroke="#F7B500"/>
+    <path d="M40 420 L40 240 L220 60 L420 60" stroke="#73C2A0"/>
+    <path d="M-20 300 L160 300 L320 140 L420 140" stroke="#5FA8FF"/>
+    <g fill="#fff"><circle cx="140" cy="120" r="9"/><circle cx="120" cy="200" r="9"/><circle cx="220" cy="60" r="9"/><circle cx="160" cy="300" r="9"/></g>
+  </svg>
+  <div class="top">
+    <div class="mark">
+      <svg viewBox="0 0 512 512"><g fill="none" stroke="#0B6B4F" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"><path d="M150 360V176a64 64 0 0 1 64-64h84a64 64 0 0 1 64 64v184a40 40 0 0 1-40 40H190a40 40 0 0 1-40-40z"/><path d="M150 268h212"/><path d="m182 430 26-40M330 430l-26-40"/></g><circle cx="202" cy="330" r="20" fill="#0B6B4F"/><circle cx="310" cy="330" r="20" fill="#0B6B4F"/></svg>
+    </div>
+    <div class="brand">ItaliaNow</div>
+  </div>
+  <div class="mid">
+    <h1>Live public transport across Italy</h1>
+    <p class="sub">Bus, metro, tram and train — real-time departures, delays and journeys.</p>
+    <div class="chips">
+      <span class="chip"><span class="dot" style="background:#E3051B"></span>Roma</span>
+      <span class="chip"><span class="dot" style="background:#009A3E"></span>Milano</span>
+      <span class="chip"><span class="dot" style="background:#F8C300"></span>Napoli</span>
+      <span class="chip"><span class="dot" style="background:#E2001A"></span>Torino</span>
+      <span class="chip"><span class="dot" style="background:#D2232A"></span>Genova</span>
+      <span class="chip"><span class="dot" style="background:#00539F"></span>Catania</span>
+    </div>
+  </div>
+  <div class="foot">
+    <span class="pill">No ads · Open data</span>
+    <span>arafin-sketch.github.io/GoItalia</span>
+  </div>
+</div>
+</body></html>

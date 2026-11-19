@@ -1,1 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#0B6B4F"/><g fill="none" stroke="#fff" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"><path d="M136 352V168a72 72 0 0 1 72-72h96a72 72 0 0 1 72 72v184"/><path d="M136 260h240"/><path d="m176 432 40-56M336 432l-40-56"/></g><circle cx="196" cy="316" r="16" fill="#fff"/><circle cx="316" cy="316" r="16" fill="#fff"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="ItaliaNow">
+  <rect width="512" height="512" rx="116" fill="#0B6B4F"/>
+  <!-- stylised metro car: body, window band, headlights and rails -->
+  <g fill="none" stroke="#fff" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M150 360V176a64 64 0 0 1 64-64h84a64 64 0 0 1 64 64v184a40 40 0 0 1-40 40H190a40 40 0 0 1-40-40z"/>
+    <path d="M150 268h212"/>
+    <path d="m182 430 26-40M330 430l-26-40"/>
+  </g>
+  <circle cx="202" cy="330" r="20" fill="#fff"/>
+  <circle cx="310" cy="330" r="20" fill="#fff"/>
+  <!-- speed marks -->
+  <g fill="#9BE3C4">
+    <rect x="66" y="196" width="40" height="22" rx="11"/>
+    <rect x="52" y="246" width="54" height="22" rx="11"/>
+    <rect x="66" y="296" width="40" height="22" rx="11"/>
+  </g>
+</svg>
