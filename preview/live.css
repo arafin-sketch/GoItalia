@@ -202,3 +202,21 @@ a.btn{text-decoration:none}
 .dep.train .plat{font-size:12px}
 .dep.train.cancelled .hd b,.dep.train.cancelled .tm b{text-decoration:line-through;color:var(--fg-3)}
 .copyright{margin-top:20px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--fg-3);text-align:center}
+/* live bus/train tracker */
+.trip-head{display:flex;align-items:flex-start;gap:10px;margin:4px 0 10px}
+.trip-head .lc{margin-top:2px}
+.od{min-width:0;flex:1}
+.route-od{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:800;font-size:17px;letter-spacing:-.01em;flex-wrap:wrap;line-height:1.2}
+.route-od .o{color:var(--fg-2);font-weight:700}
+.route-od .d{color:var(--fg)}
+.od-arrow,.route-od svg{width:20px;height:20px;color:var(--fg-3);flex:none}
+.od small{display:block;color:var(--fg-3);margin-top:4px;font-size:13px}
+.od .tag{background:var(--ok-bg);color:var(--ok);border-radius:999px;padding:1px 8px;font-weight:700}
+.destflag{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--brand);background:var(--brand-soft);border-radius:5px;padding:1px 6px;vertical-align:1px}
+.tl-row.passed{opacity:.5}
+.node.nextnode{--c:var(--fg)!important;background:var(--fg)}
+.busmark{position:absolute;left:50%;top:-18px;transform:translateX(-50%);width:26px;height:26px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.3);border:2px solid var(--surface);z-index:2;animation:bob 1.6s ease-in-out infinite}
+.busmark svg{width:15px;height:15px}
+@keyframes bob{50%{transform:translate(-50%,-3px)}}
+.mk-veh{width:30px;height:30px;border-radius:50%;color:#fff;display:grid;place-items:center;border:3px solid var(--surface);box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.mk-veh svg{width:17px;height:17px}

@@ -14,7 +14,7 @@ const store = {
 const STR = {
  en: {
   rights: "All rights reserved", about_data: "Open data · GTFS (ATAC · ATM · ANM · GTT · AMT · FCE) · Transitous (MOTIS 2) · RFI ViaggiaTreno", about_tech: "Offline routing engine · {l} lines · {s} stations · real-time · installable PWA · no tracking", contactless: "Pay by contactless", more_info: "More info", buy_tickets: "Buy tickets", buy_note: "Tickets are sold by the operators. ItaliaNow takes you to their official app or website.", live_legend: "Live position", sched_legend: "Timetable position",
-  good_morning: "Good morning", good_afternoon: "Good afternoon", good_evening: "Good evening", good_night: "Good night", departing: "Departing nearby", live_trains: "Live trains", trains_at: "Trains at {s}", departures: "Departures", departed: "left", updated_short: "updated {t}", stale_board: "last available board", trains_note: "Live train times, delays and platforms from RFI ViaggiaTreno. Trenitalia and most regional trains; Italo is not included.", see_all_stops: "All stops nearby", set: "Set", service_alerts: "Service alerts", prices_auto: "Prices are read from the official websites every day.", checked_on: "Checked {d}",
+  good_morning: "Good morning", good_afternoon: "Good afternoon", good_evening: "Good evening", good_night: "Good night", departing: "Departing nearby", live_trains: "Live trains", trains_at: "Trains at {s}", departures: "Departures", departed: "left", scheduled: "Scheduled", destination: "Destination", arriving: "Arriving", in_min: "in {m} min", live_pos_note: "Live vehicle position.", est_pos_note: "Position estimated from real-time delay.", sched_pos_note: "Position estimated from the timetable.", updated_short: "updated {t}", stale_board: "last available board", trains_note: "Live train times, delays and platforms from RFI ViaggiaTreno. Trenitalia and most regional trains; Italo is not included.", see_all_stops: "All stops nearby", set: "Set", service_alerts: "Service alerts", prices_auto: "Prices are read from the official websites every day.", checked_on: "Checked {d}",
   tickets: "Tickets", ticket_prices: "Ticket prices", tickets_in: "Tickets in {c}", from_price: "from {p}", valid_min: "Valid {m} min", fare_other: "Train or regional fare: check with the operator", fare_n: "{n} × {t}", prices_checked: "Official prices from {o}, checked {d}.", official_site: "Official website", no_prices: "We couldn't verify prices for this city yet. See the operator's website.", paper: "{p} on paper",
   home_tab: "Home", stations: "Stations", nearest: "Nearest stops", favourites: "Favourites", stop_code: "Stop {c}", walk_min: "{m} min walk", all_deps: "All departures", scheduled: "Scheduled", search_line: "Search for a line", alerts: "Alerts", recent_lines: "Recent", clear: "Clear", no_alerts: "No service alerts reported right now.", no_fav_stops: "No favourite stops yet. Tap the star on a stop to add it.", no_fav_lines: "No favourite lines yet. Tap the star on a line to add it.", show_more: "Show more", direction: "Direction", tap_stop: "Tap a stop to see when this line arrives there.", vehicles_now: n => n === 1 ? "1 vehicle on the line now" : `${n} vehicles on the line now`, no_lines: "No lines match your search.", loading_lines: "Loading lines…", n_alerts: n => n === 1 ? "1 service alert" : `${n} service alerts`, add_fav: "Add to favourites", remove_fav: "Remove from favourites", lines_at: "Lines", no_live_here: "No departures of this line in the next hour.", city: "City",
   plan: "Directions", nearby: "Nearby", where_to: "Where to?", set_home: "Set home", set_work: "Set work", save_place: "Save this destination", saved_places: "Saved places", remove: "Remove", share: "Share", copied: "Copied", install: "Install app", install_s: "Add ItaliaNow to your home screen.", sort_by: "Sort", set_hint: "Search for a place, then save it as Home or Work from the results.", lines: "Lines", saved: "Saved", more: "More",
@@ -55,7 +55,7 @@ const STR = {
  },
  it: {
   rights: "Tutti i diritti riservati", about_data: "Dati aperti · GTFS (ATAC · ATM · ANM · GTT · AMT · FCE) · Transitous (MOTIS 2) · RFI ViaggiaTreno", about_tech: "Motore di calcolo offline · {l} linee · {s} stazioni · tempo reale · PWA installabile · nessun tracciamento", contactless: "Paga con carta contactless", more_info: "Maggiori informazioni", buy_tickets: "Acquista biglietti", buy_note: "I biglietti sono venduti dagli operatori. ItaliaNow ti porta alla loro app o al sito ufficiale.", live_legend: "Posizione in tempo reale", sched_legend: "Posizione da orario",
-  good_morning: "Buongiorno", good_afternoon: "Buon pomeriggio", good_evening: "Buonasera", good_night: "Buonanotte", departing: "In partenza qui vicino", live_trains: "Treni in tempo reale", trains_at: "Treni a {s}", departures: "Partenze", departed: "partito", updated_short: "agg. {t}", stale_board: "ultimo quadro disponibile", trains_note: "Orari, ritardi e binari in tempo reale da RFI ViaggiaTreno. Trenitalia e gran parte dei regionali; Italo non è incluso.", see_all_stops: "Tutte le fermate vicine", set: "Imposta", service_alerts: "Avvisi di servizio", prices_auto: "I prezzi vengono letti ogni giorno dai siti ufficiali.", checked_on: "Verificati il {d}",
+  good_morning: "Buongiorno", good_afternoon: "Buon pomeriggio", good_evening: "Buonasera", good_night: "Buonanotte", departing: "In partenza qui vicino", live_trains: "Treni in tempo reale", trains_at: "Treni a {s}", departures: "Partenze", departed: "partito", scheduled: "Da orario", destination: "Destinazione", arriving: "In arrivo", in_min: "tra {m} min", live_pos_note: "Posizione del mezzo in tempo reale.", est_pos_note: "Posizione stimata dal ritardo in tempo reale.", sched_pos_note: "Posizione stimata dall’orario.", updated_short: "agg. {t}", stale_board: "ultimo quadro disponibile", trains_note: "Orari, ritardi e binari in tempo reale da RFI ViaggiaTreno. Trenitalia e gran parte dei regionali; Italo non è incluso.", see_all_stops: "Tutte le fermate vicine", set: "Imposta", service_alerts: "Avvisi di servizio", prices_auto: "I prezzi vengono letti ogni giorno dai siti ufficiali.", checked_on: "Verificati il {d}",
   tickets: "Biglietti", ticket_prices: "Prezzi dei biglietti", tickets_in: "Biglietti a {c}", from_price: "da {p}", valid_min: "Valido {m} min", fare_other: "Tariffa treno o regionale: verifica con l'operatore", fare_n: "{n} × {t}", prices_checked: "Prezzi ufficiali di {o}, verificati il {d}.", official_site: "Sito ufficiale", no_prices: "Non abbiamo ancora potuto verificare i prezzi per questa città. Consulta il sito dell'operatore.", paper: "{p} su carta",
   home_tab: "Home", stations: "Fermate", nearest: "Fermate più vicine", favourites: "Preferiti", stop_code: "Fermata {c}", walk_min: "{m} min a piedi", all_deps: "Tutte le partenze", scheduled: "Programmato", search_line: "Cerca una linea", alerts: "Avvisi", recent_lines: "Recenti", clear: "Cancella", no_alerts: "Nessun avviso di servizio al momento.", no_fav_stops: "Nessuna fermata preferita. Tocca la stella su una fermata per aggiungerla.", no_fav_lines: "Nessuna linea preferita. Tocca la stella su una linea per aggiungerla.", show_more: "Mostra altre", direction: "Direzione", tap_stop: "Tocca una fermata per vedere quando passa questa linea.", vehicles_now: n => n === 1 ? "1 mezzo in linea ora" : `${n} mezzi in linea ora`, no_lines: "Nessuna linea corrisponde alla ricerca.", loading_lines: "Caricamento linee…", n_alerts: n => n === 1 ? "1 avviso di servizio" : `${n} avvisi di servizio`, add_fav: "Aggiungi ai preferiti", remove_fav: "Rimuovi dai preferiti", lines_at: "Linee", no_live_here: "Nessun passaggio di questa linea nella prossima ora.", city: "Città",
   plan: "Percorso", nearby: "Vicino", where_to: "Dove vuoi andare?", set_home: "Imposta casa", set_work: "Imposta lavoro", save_place: "Salva questa destinazione", saved_places: "Luoghi salvati", remove: "Rimuovi", share: "Condividi", copied: "Copiato", install: "Installa app", install_s: "Aggiungi ItaliaNow alla schermata Home.", sort_by: "Ordina", set_hint: "Cerca un luogo, poi salvalo come Casa o Lavoro dai risultati.", lines: "Linee", saved: "Salvati", more: "Altro",
@@ -162,6 +162,7 @@ const I = {
   more: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
   card: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6 15h4"/><path d="M15.5 13.5a3 3 0 0 1 0 3M17.5 12a5.5 5.5 0 0 1 0 6" /></svg>',
   ticket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2.5 2.5 0 0 0 0 5v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2.5 2.5 0 0 0 0-5V7z"/><path d="M14 5v14" stroke-dasharray="2 2.5"/></svg>',
+  arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg>',
   route: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.5"/></svg>',
   warn: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>',
   off: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 8.8a15 15 0 0 1 4.3-2.6M9.8 5.2A15 15 0 0 1 22 8.8M5 12.5a10 10 0 0 1 3.5-2M12.6 9.6A10 10 0 0 1 19 12.5M8.5 16a5 5 0 0 1 7 0M3 3l18 18"/></svg>',
@@ -536,6 +537,12 @@ async function startWithLocation(ask) {
 let refreshTimer = null, nearbyReq = 0;
 function stopRefresh() { clearInterval(refreshTimer); refreshTimer = null; }
 function startRefresh() { stopRefresh(); refreshTimer = setInterval(() => { if (document.visibilityState !== "visible") return; if (S.view === "trip") return render(); if (!["nearby", "home"].includes(S.tab)) return; if (S.tab === "nearby" && S.stationsTab === "fav" && !S.view) return loadFavourites(true); loadTrains(true).then(() => { if (S.view === "trains") render(); }); if (S.view === "trains") return; loadNearby(S.nearby.center, true); }, CFG.REFRESH_SECONDS * 1000); }
+setInterval(() => { // keep "X min" counters in step with the clock without re-fetching
+  if (document.visibilityState !== "visible") return;
+  const live = (S.tab === "home" && !S.view) || (S.tab === "nearby" && !S.view && S.stationsTab !== "fav");
+  if (!live) return;
+  const b = $("#body"); const sc = b ? b.scrollTop : 0; render(); if (b && $("#body")) $("#body").scrollTop = sc;
+}, 15000);
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && ["nearby", "home"].includes(S.tab) && S.nearby.updated && Date.now() - S.nearby.updated > CFG.REFRESH_SECONDS * 1000) loadNearby(S.nearby.center, true); });
 async function loadNearby(center = S.nearby.center || S.me || CFG.DEFAULT_CENTER, silent = false) {
   const id = ++nearbyReq; S.nearby.center = center; S.nearby.loading = true; S.nearby.error = null; $("#hereBtn").hidden = true;
@@ -576,7 +583,7 @@ function updateRefreshLine() { const el = $("#refreshLine"); if (!el) return; if
 function refreshLine() {
   const n = S.nearby; return `<span class="ring ${n.loading ? "spin" : ""}" aria-hidden="true"></span>${n.loading && !n.updated ? t("updating") : n.updated ? t("updated", { t: fmtTime(new Date(n.updated)), s: CFG.REFRESH_SECONDS }) : ""}`;
 }
-function minutesUntil(iso) { return Math.round((new Date(iso) - Date.now()) / 60000); }
+function minutesUntil(iso) { return Math.floor((new Date(iso) - Date.now()) / 60000); }
 function depTimeHtml(x) {
   const p = x.place || x; const dep = p.departure || p.arrival, sd = p.scheduledDeparture || p.scheduledArrival;
   const m = minutesUntil(dep); const cancelled = p.cancelled || x.cancelled;
@@ -746,33 +753,65 @@ async function loadFavourites(force) {
 }
 
 /* trip page: every stop of one bus / tram / metro / train run, with live times */
+/* where the vehicle is now: use its live position if we have it, else interpolate
+   along the route from the (delay-aware) stop times */
+function busPosition(stops, nextIdx, now) {
+  const T = s => +new Date(s.departure || s.arrival || s.scheduledDeparture || s.scheduledArrival);
+  if (nextIdx <= 0) { const s = stops[0]; return { lat: s.lat, lon: s.lon, seg: 0, before: true }; }
+  if (nextIdx >= stops.length) { const s = stops[stops.length - 1]; return { lat: s.lat, lon: s.lon, seg: stops.length - 1, done: true }; }
+  const a = stops[nextIdx - 1], b = stops[nextIdx];
+  const ta = +new Date(a.departure || a.scheduledDeparture || a.arrival), tb = T(b);
+  const f = tb > ta ? Math.max(0, Math.min(1, (now - ta) / (tb - ta))) : 0;
+  return { lat: a.lat + (b.lat - a.lat) * f, lon: a.lon + (b.lon - a.lon) * f, seg: nextIdx - 1 };
+}
 async function renderTrip(el) {
   const ref = S.params.ref; const keep = S.params;
-  el.innerHTML = `${backBtn(S.params.back || "to-nearby")}<div class="row" style="gap:10px;margin:4px 0 8px">${chip(ref.name, ref.color, liveMode(ref.mode))}<h2 class="title" style="margin:0;font-size:19px;flex:1;min-width:0" id="tripTitle">${t("trip")}</h2></div><div id="tripBody"><div class="skel"></div></div>`;
+  el.innerHTML = `${backBtn(S.params.back || "to-nearby")}
+    <div class="trip-head">${chip(ref.name, ref.color, liveMode(ref.mode))}<div class="od" id="tripOD"><b>${t("trip")}</b></div></div>
+    <div id="tripBody"><div class="skel"></div></div>`;
   clearMarkers(); showMe();
   try {
-    const r = await api.get("/api/v5/trip", { tripId: ref.tripId }, { ttl: 20 });
+    const r = await api.get("/api/v5/trip", { tripId: ref.tripId }, { ttl: 15 });
     if (S.params !== keep) return;
     const l = r.legs.find(x => x.mode !== "WALK") || r.legs[0];
     const stops = [l.from, ...(l.intermediateStops || []), l.to];
-    const now = Date.now();
-    let nextIdx = stops.findIndex(s => new Date(s.departure || s.arrival) > now); if (nextIdx < 0) nextIdx = stops.length;
-    $("#tripTitle").textContent = `${t("towards")} ${titleish(l.headsign || l.to.name)}`;
+    const col = "#" + normColor(ref.color); const now = Date.now();
+    const T = s => +new Date(s.departure || s.arrival || s.scheduledDeparture || s.scheduledArrival);
+    let nextIdx = stops.findIndex(s => T(s) > now); if (nextIdx < 0) nextIdx = stops.length;
+    const origin = titleish(stops[0].name), dest = titleish(l.headsign || l.to.name);
+    // header: origin -> destination with an arrow
+    $("#tripOD").innerHTML = `<div class="route-od"><span class="o">${esc(origin)}</span>${I.arrow}<span class="d">${esc(dest)}</span></div>
+      <small>${esc(l.agencyName || "")} · ${t("stops", stops.length)} · ${l.realTime ? `<span class="tag">${t("live")}</span>` : t("scheduled")}</small>`;
+    // live position of the vehicle (GPS if present, else delay-aware interpolation)
+    const v = (S.vehicles || []).find(x => x.tripId === ref.tripId && now <= x.arr + 30000 && now >= x.dep - 60000);
+    const pos = v ? (() => { const [la, lo] = vehiclePos(v, now); return { lat: la, lon: lo, seg: -1 }; })() : busPosition(stops, nextIdx, now);
+    const liveGps = !!(v && v.rt);
+    // timeline of every stoppage point; the bus marker sits before the next stop
     const rows = stops.map((s, k) => {
-      const tm = s.arrival && k ? s.arrival : s.departure || s.arrival; const sch = k ? (s.scheduledArrival || s.scheduledDeparture) : (s.scheduledDeparture || s.scheduledArrival);
-      const passed = k < nextIdx; const shifted = l.realTime && tm && sch && Math.abs(new Date(tm) - new Date(sch)) >= 60000;
-      return `<div class="tl-row" style="${passed ? "opacity:.55" : ""}"><div class="tl-time tnum">${tm ? fmtTime(new Date(tm)) : ""}${shifted ? `<s>${fmtTime(new Date(sch))}</s>` : ""}</div><div class="tl-rail ${k === 0 ? "first" : ""} ${k === stops.length - 1 ? "last" : ""}" style="--c:#${normColor(ref.color)}"><span class="node" ${k === nextIdx ? 'style="--c:var(--fg);background:var(--fg)"' : ""}></span></div><div class="tl-body"><div class="stn" style="font-weight:${k === nextIdx ? 800 : 600}">${esc(titleish(s.name))}</div>${s.track || (k === nextIdx && l.realTime) || s.cancelled ? `<div class="info">${s.track ? `<span class="plat">${t("platform")} ${esc(s.track)}</span>` : ""}${k === nextIdx ? delayBadge(sch, tm, l.realTime, s.cancelled) : s.cancelled ? `<span class="delay cx">${t("cancelled")}</span>` : ""}</div>` : ""}</div></div>`;
+      const tm = s.arrival && k ? s.arrival : (s.departure || s.arrival); const sch = k ? (s.scheduledArrival || s.scheduledDeparture) : (s.scheduledDeparture || s.scheduledArrival);
+      const passed = k < nextIdx; const isNext = k === nextIdx;
+      const shifted = l.realTime && tm && sch && Math.abs(new Date(tm) - new Date(sch)) >= 60000;
+      const busHere = (k === nextIdx && nextIdx > 0 && nextIdx < stops.length);
+      return `<div class="tl-row ${passed ? "passed" : ""}">
+        <div class="tl-time tnum">${tm ? fmtTime(new Date(tm)) : ""}${shifted ? `<s>${fmtTime(new Date(sch))}</s>` : ""}</div>
+        <div class="tl-rail ${k === 0 ? "first" : ""} ${k === stops.length - 1 ? "last" : ""}" style="--c:${col}">${busHere ? `<span class="busmark" style="--c:${col}">${modeIcon(ref.mode === "metro" ? "SUBWAY" : (ref.mode || "BUS").toUpperCase())}</span>` : ""}<span class="node ${isNext ? "nextnode" : ""}"></span></div>
+        <div class="tl-body"><div class="stn" style="font-weight:${isNext || k === stops.length - 1 ? 800 : 600}">${esc(titleish(s.name))}${k === stops.length - 1 ? ` <span class="destflag">${t("destination")}</span>` : ""}</div>
+          ${(s.track || isNext || s.cancelled) ? `<div class="info">${s.track ? `<span class="plat">${t("platform")} ${esc(s.track)}</span>` : ""}${isNext ? `<span class="muted small">${minutesUntil(tm) <= 0 ? t("arriving") : t("in_min", { m: nf(minutesUntil(tm)) })}</span>` : ""}${isNext ? delayBadge(sch, tm, l.realTime, s.cancelled) : s.cancelled ? `<span class="delay cx">${t("cancelled")}</span>` : ""}</div>` : ""}</div></div>`;
     }).join("");
-    $("#tripBody").innerHTML = `<p class="muted small" style="margin:-4px 0 12px">${esc(l.agencyName || "")} · ${t("stops", stops.length)}${l.realTime ? ` · <span class="tag">${t("live")}</span>` : ""}</p><div class="tl">${rows}</div>`;
+    $("#tripBody").innerHTML = `<div class="tl">${rows}</div><p class="small muted" style="margin:10px 0 0">${liveGps ? t("live_pos_note") : l.realTime ? t("est_pos_note") : t("sched_pos_note")}</p>`;
+    // map: full route + every stop + the vehicle's current position
     const g = l.legGeometry; const pts = g?.points ? decode(g.points, g.precision || 6) : stops.map(s => [s.lat, s.lon]);
-    setJourney({ type: "FeatureCollection", features: [{ type: "Feature", properties: { walk: false, color: "#" + normColor(ref.color) }, geometry: { type: "LineString", coordinates: pts.map(([a, b]) => [b, a]) } }] });
-    stops.forEach((s, k) => { const m = addMarker(s.lat, s.lon, "mk-end", "", null, titleish(s.name)); Object.assign(m.style, { width: (k === nextIdx ? 16 : 10) + "px", height: (k === nextIdx ? 16 : 10) + "px", borderWidth: "3px", borderColor: "#" + normColor(ref.color) }); });
-    fit(pts, 15);
+    setJourney({ type: "FeatureCollection", features: [{ type: "Feature", properties: { walk: false, color: col }, geometry: { type: "LineString", coordinates: pts.map(([a, b]) => [b, a]) } }] });
+    stops.forEach((s, k) => { const m = addMarker(s.lat, s.lon, "mk-stop", "", () => { stopSrc = [{ ...s, stopId: s.stopId, name: s.name, modes: [l.mode] }]; }, titleish(s.name)); Object.assign(m.style, { width: "11px", height: "11px", borderRadius: "50%", borderWidth: "3px", background: "var(--surface)", color: col }); });
+    const vm = addMarker(pos.lat, pos.lon, "mk-veh", modeIcon(ref.mode === "metro" ? "SUBWAY" : (ref.mode || "BUS").toUpperCase()), null, ref.name);
+    vm.style.background = col;
+    if (S._tripFirst !== ref.tripId) { S._tripFirst = ref.tripId; fit(pts, 15); } else { map?.easeTo({ center: [pos.lon, pos.lat], duration: 600 }); }
   } catch {
     if (S.params !== keep) return;
     $("#tripBody").innerHTML = `<div class="err"><b>${t("trip_err")}</b><button class="btn tonal" data-act="retry-trip">${t("retry")}</button></div>`;
   }
 }
+
 function renderStop(el) {
   const s = S.params.s; if (!s) return go(S.tab);
   stopSrc = [s];
@@ -1220,7 +1259,7 @@ function renderAttr(el) {
 
 /* ================= router / events ================= */
 const body = $("#body");
-function go(tab, view = null, params = {}) { S.tab = tab; S.view = view; S.params = params; render(); }
+function go(tab, view = null, params = {}) { if (view !== "trip") S._tripFirst = null; S.tab = tab; S.view = view; S.params = params; render(); }
 function render() {
   renderNav(); renderBadge(); renderStrike();
   if (!["nearby", "home"].includes(S.tab) || S.view) $("#hereBtn").hidden = true;
